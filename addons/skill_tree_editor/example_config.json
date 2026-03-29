@@ -185,7 +185,7 @@
 				-122.25
 			],
 			"purchased": 1,
-			"unlocks_letter": "",
+			"secondary_unlock": "",
 			"unlocks_on_max": 1,
 			"unlocks_on_purchase": 1,
 			"value": 0.0
@@ -195,18 +195,18 @@
 			"cost_increase": 0,
 			"description": "",
 			"effect": "NONE",
-			"emoticon": "",
+			"emoticon": "😉",
 			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				436.5,
+				368.75,
 				102.5
 			],
 			"purchased": 0,
-			"unlocks_letter": "",
+			"secondary_unlock": "A",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 1,
 			"value": 0.0
@@ -216,18 +216,18 @@
 			"cost_increase": 0,
 			"description": "",
 			"effect": "NONE",
-			"emoticon": "",
+			"emoticon": "✈️",
 			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				312.75,
-				263.75
+				366.5,
+				223.749984741211
 			],
 			"purchased": 0,
-			"unlocks_letter": "",
+			"secondary_unlock": "A",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
@@ -236,19 +236,19 @@
 			"cost": 100,
 			"cost_increase": 0,
 			"description": "",
-			"effect": "NONE",
-			"emoticon": "",
+			"effect": "ITEM_FIND",
+			"emoticon": "🤩",
 			"exponential": false,
-			"group": "",
+			"group": "-u",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				737.75,
-				90.0
+				742.75,
+				85.0
 			],
 			"purchased": 0,
-			"unlocks_letter": "",
+			"secondary_unlock": "A",
 			"unlocks_on_max": 1,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
@@ -269,7 +269,7 @@
 				236.25
 			],
 			"purchased": 0,
-			"unlocks_letter": "",
+			"secondary_unlock": "",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
@@ -290,7 +290,7 @@
 				-61.25
 			],
 			"purchased": 1,
-			"unlocks_letter": "",
+			"secondary_unlock": "",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
@@ -311,7 +311,7 @@
 				-22.5
 			],
 			"purchased": 1,
-			"unlocks_letter": "",
+			"secondary_unlock": "",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
@@ -332,10 +332,17 @@
 				28.75
 			],
 			"purchased": 0,
-			"unlocks_letter": "",
+			"secondary_unlock": "",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 0,
 			"value": 0.0
 		}
-	}
+	},
+	"secondary_unlocks": [
+		"NONE",
+		"A",
+		"B",
+		"C",
+		"D"
+	]
 }

@@ -23,7 +23,7 @@ signal connection_rejected(node_id: String)
 
 # ── Enums ────────────────────────────────────────────────────────────────
 
-enum Mode { CREATE, EDIT, DELETE }
+enum Mode { CREATE, DELETE }
 enum ArrowType { MAXED, PURCHASED, RANK_UP }
 
 # ── Selection & mode state ───────────────────────────────────────────────
@@ -65,7 +65,7 @@ var last_saved_data: Dictionary = {}
 ## id → { name, cost, cost_increase, exponential, max, description, effect,
 ##         value, position:Vector2, emoticon, image,
 ##         unlocks_on_purchase, unlocks_on_max, has_rank_up_child,
-##         group, purchased, unlocks_letter }
+##         group, purchased, secondary_unlock }
 var nodes: Dictionary = {}
 
 ## Array of { from:String, to:String, type:String("maxed"|"purchased"|"rank_up") }
@@ -80,6 +80,9 @@ var custom_effects: PackedStringArray = []
 
 ## Array of { flag:String, label:String, effects:PackedStringArray }
 var custom_groups: Array = []
+
+## Array of secondary unlock name strings, e.g. ["NONE", "A", "B", ...]
+var custom_secondary_unlocks: PackedStringArray = []
 
 
 func _init() -> void:
@@ -119,6 +122,7 @@ func _load_defaults() -> void:
 		{"flag": "-x", "label": "CUSTOM", "effects": PackedStringArray([
 			"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5"])},
 	]
+	custom_secondary_unlocks = PackedStringArray(["NONE"])
 
 
 # ── Node helpers ─────────────────────────────────────────────────────────
@@ -451,6 +455,51 @@ func remove_effect_from_group(flag: String, effect_name: String) -> void:
 			return
 
 
+# ── Secondary Unlock helpers ────────────────────────────────────────────
+
+func get_secondary_unlock_names() -> PackedStringArray:
+	if custom_secondary_unlocks.size() > 0:
+		return custom_secondary_unlocks
+	return PackedStringArray(["NONE"])
+
+
+func add_secondary_unlock(uname: String) -> void:
+	if uname != "" and not custom_secondary_unlocks.has(uname):
+		custom_secondary_unlocks.append(uname)
+		data_changed.emit()
+
+
+func remove_secondary_unlock(uname: String) -> void:
+	var idx := -1
+	for i in range(custom_secondary_unlocks.size()):
+		if custom_secondary_unlocks[i] == uname:
+			idx = i
+			break
+	if idx < 0:
+		return
+	custom_secondary_unlocks.remove_at(idx)
+	# Cascade: reset nodes using this unlock to "NONE"
+	for nid in nodes:
+		if nodes[nid].get("secondary_unlock", "") == uname:
+			nodes[nid]["secondary_unlock"] = "NONE"
+	data_changed.emit()
+
+
+func rename_secondary_unlock(old_name: String, new_name: String) -> void:
+	if old_name == new_name or new_name == "":
+		return
+	if custom_secondary_unlocks.has(new_name):
+		return
+	for i in range(custom_secondary_unlocks.size()):
+		if custom_secondary_unlocks[i] == old_name:
+			custom_secondary_unlocks[i] = new_name
+			break
+	for nid in nodes:
+		if nodes[nid].get("secondary_unlock", "") == old_name:
+			nodes[nid]["secondary_unlock"] = new_name
+	data_changed.emit()
+
+
 # ── Serialisation ────────────────────────────────────────────────────────
 
 func to_dict() -> Dictionary:
@@ -474,7 +523,7 @@ func to_dict() -> Dictionary:
 			"unlocks_on_max":      n.get("unlocks_on_max", 0),
 			"group":               n.get("group", ""),
 			"purchased":           n.get("purchased", 0),
-			"unlocks_letter":      n.get("unlocks_letter", ""),
+			"secondary_unlock":    n.get("secondary_unlock", ""),
 		}
 	var ca := []
 	for c in connections:
@@ -491,12 +540,17 @@ func to_dict() -> Dictionary:
 			ge.append(e)
 		groups_arr.append({"flag": g["flag"], "label": g["label"], "effects": ge})
 
+	var sec_arr := []
+	for s in custom_secondary_unlocks:
+		sec_arr.append(s)
+
 	return {
 		"nodes": nd,
 		"connections": ca,
 		"next_id": _next_id,
 		"effects": effects_arr,
 		"groups": groups_arr,
+		"secondary_unlocks": sec_arr,
 	}
 
 
@@ -523,10 +577,17 @@ func from_dict(data: Dictionary) -> void:
 				"effects": effs,
 			})
 
+	if data.has("secondary_unlocks") and data["secondary_unlocks"] is Array and data["secondary_unlocks"].size() > 0:
+		custom_secondary_unlocks = PackedStringArray()
+		for s in data["secondary_unlocks"]:
+			custom_secondary_unlocks.append(str(s))
+
 	if data.has("nodes"):
 		for id in data["nodes"]:
 			var n: Dictionary = data["nodes"][id]
 			var pa = n.get("position", [0, 0])
+			# Backward compat: old files may have "unlocks_letter" instead of "secondary_unlock"
+			var sec: String = str(n.get("secondary_unlock", n.get("unlocks_letter", "")))
 			nodes[id] = {
 				"name":                str(n.get("name", "")),
 				"cost":                int(n.get("cost", 0)),
@@ -544,7 +605,7 @@ func from_dict(data: Dictionary) -> void:
 				"has_rank_up_child":   false,
 				"group":               str(n.get("group", "")),
 				"purchased":           int(n.get("purchased", 0)),
-				"unlocks_letter":      str(n.get("unlocks_letter", "")),
+				"secondary_unlock":    sec,
 			}
 	if data.has("connections"):
 		for c in data["connections"]:

@@ -1,8 +1,10 @@
 ## Main-screen canvas for the Skill Tree Editor.
 ##
 ## Provides a zoomable, pannable graph where each skill is a draggable node card.
-## Dependency arrows connect parent→child.  Three interaction modes (Create,
-## Edit, Delete) control what actions are available.
+## Dependency arrows connect parent→child.  Two interaction modes (Create,
+## Delete) control what actions are available.  Left-click draws green (unlock)
+## arrows; right-click draws gold (maxed) arrows.  Clicking an existing arrow
+## with the opposite button toggles its type.
 ##
 ## Canvas architecture:
 ##   _canvas_clip (Panel, dark-blue background, clip_contents=true)
@@ -66,8 +68,7 @@ var _cam_zoom := 1.0
 var _canvas_clip: Panel
 var _arrow_layer: Control
 var _overlay_layer: Control
-var _mode_btns: Array[Button] = []
-var _arrow_btn: Button
+var _mode_toggle: Button
 var _title_lbl: Label
 var _file_dlg: EditorFileDialog
 var _file_dlg_mode: String = ""
@@ -129,32 +130,10 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 	bar.add_theme_constant_override("separation", 4)
 	parent.add_child(bar)
 
-	bar.add_child(_tb("Save", _on_save))
+	bar.add_child(_tb_icon("Save", "Save", _on_save))
 	bar.add_child(_tb("Save As\u2026", _on_save_as))
-	bar.add_child(_tb("Open\u2026", _on_open))
-	bar.add_child(_tb("Load Config", _on_load_game_tree))
-	bar.add_child(VSeparator.new())
-
-	var bg := ButtonGroup.new()
-	var b_create := _tb("Create", _on_mode.bind(0))
-	var b_edit   := _tb("Edit",   _on_mode.bind(1))
-	var b_delete := _tb("Delete", _on_mode.bind(2))
-	for b: Button in [b_create, b_edit, b_delete]:
-		b.toggle_mode = true
-		b.button_group = bg
-	b_create.button_pressed = true
-	b_delete.add_theme_color_override("font_color", Color(0.95, 0.35, 0.35))
-	_mode_btns = [b_create, b_edit, b_delete]
-	bar.add_child(b_create)
-	bar.add_child(b_edit)
-	bar.add_child(b_delete)
-	bar.add_child(VSeparator.new())
-
-	_arrow_btn = _tb("Arrow: Unlock", _on_arrow_toggle)
-	_arrow_btn.toggle_mode = true
-	_arrow_btn.tooltip_text = "Toggle new-arrow type.\nGreen = unlocks on first purchase.\nYellow = requires parent maxed.\nAlso updates a selected arrow."
-	_arrow_btn.add_theme_color_override("font_color", Color(0.30, 0.90, 0.40))
-	bar.add_child(_arrow_btn)
+	bar.add_child(_tb_icon("Load", "Open\u2026", _on_open))
+	bar.add_child(_tb("Load Game\u2019s Config", _on_load_game_tree))
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -169,6 +148,21 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 func _tb(text: String, cb: Callable) -> Button:
 	var b := Button.new()
 	b.text = text
+	b.pressed.connect(cb)
+	return b
+
+
+func _tb_icon(icon_name: String, tooltip: String, cb: Callable) -> Button:
+	var b := Button.new()
+	if Engine.is_editor_hint():
+		var icon := EditorInterface.get_base_control().get_theme_icon(icon_name, "EditorIcons")
+		if icon:
+			b.icon = icon
+		else:
+			b.text = tooltip
+	else:
+		b.text = tooltip
+	b.tooltip_text = tooltip
 	b.pressed.connect(cb)
 	return b
 
@@ -209,6 +203,36 @@ func _build_canvas(parent: VBoxContainer) -> void:
 
 	# Resize draw layers to match canvas whenever canvas is laid out
 	_canvas_clip.resized.connect(_sync_layer_sizes)
+
+	_build_mode_toggle()
+
+
+func _build_mode_toggle() -> void:
+	_mode_toggle = Button.new()
+	_mode_toggle.flat = true
+	_mode_toggle.mouse_filter = MOUSE_FILTER_STOP
+	_mode_toggle.z_index = 2
+	_mode_toggle.custom_minimum_size = Vector2(32, 32)
+	_mode_toggle.pressed.connect(_toggle_mode)
+
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.12, 0.14, 0.20, 0.85)
+	style.set_corner_radius_all(4)
+	style.set_content_margin_all(6)
+	_mode_toggle.add_theme_stylebox_override("normal", style)
+
+	var hover_style := style.duplicate()
+	hover_style.bg_color = Color(0.18, 0.22, 0.32, 0.95)
+	_mode_toggle.add_theme_stylebox_override("hover", hover_style)
+
+	_canvas_clip.add_child(_mode_toggle)
+	_mode_toggle.set_anchors_preset(PRESET_TOP_RIGHT)
+	_mode_toggle.offset_left = -44
+	_mode_toggle.offset_top = 8
+	_mode_toggle.offset_right = -12
+	_mode_toggle.offset_bottom = 40
+
+	_update_mode_toggle_icon()
 
 
 # ── Coordinate math ──────────────────────────────────────────────────────
@@ -261,7 +285,10 @@ func _wire() -> void:
 	if not _ctx:
 		return
 	_ctx.data_changed.connect(_on_data)
-	_ctx.mode_changed.connect(func(_m): _redraw_overlay())
+	_ctx.mode_changed.connect(func(_m):
+		_redraw_overlay()
+		_update_mode_toggle_icon()
+	)
 	_ctx.connection_rejected.connect(_shake_card)
 
 
@@ -315,22 +342,45 @@ func _create_card(id: String) -> void:
 	sty.set_content_margin_all(8)
 	panel.add_theme_stylebox_override("panel", sty)
 
+	# Main layout: HBox with optional icon column on the left
+	var main_hb := HBoxContainer.new()
+	main_hb.mouse_filter = MOUSE_FILTER_IGNORE
+	main_hb.add_theme_constant_override("separation", 6)
+	panel.add_child(main_hb)
+
+	# Icon column (left of name + cost) — square, scaled to fit node height
+	var icon_size := NODE_H - 16.0  # subtract content margins (8px each side)
+	var icon_tex := TextureRect.new()
+	icon_tex.custom_minimum_size = Vector2(icon_size, icon_size)
+	icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	icon_tex.mouse_filter = MOUSE_FILTER_IGNORE
+	icon_tex.size_flags_vertical = SIZE_SHRINK_CENTER
+	icon_tex.visible = false
+	main_hb.add_child(icon_tex)
+
+	var emote := Label.new()
+	emote.text = d.get("emoticon", "")
+	emote.visible = false
+	emote.mouse_filter = MOUSE_FILTER_IGNORE
+	emote.add_theme_font_size_override("font_size", 44)
+	emote.size_flags_vertical = SIZE_SHRINK_CENTER
+	main_hb.add_child(emote)
+
+	_apply_icon(d.get("emoticon", ""), emote, icon_tex)
+
+	# Right column: name + cost rows
 	var vb := VBoxContainer.new()
 	vb.mouse_filter = MOUSE_FILTER_IGNORE
 	vb.add_theme_constant_override("separation", 2)
-	panel.add_child(vb)
+	vb.size_flags_horizontal = SIZE_EXPAND_FILL
+	main_hb.add_child(vb)
 
-	# Row 1: emoticon + name
+	# Row 1: name + badge
 	var top := HBoxContainer.new()
 	top.mouse_filter = MOUSE_FILTER_IGNORE
 	top.add_theme_constant_override("separation", 4)
 	vb.add_child(top)
-
-	var emote := Label.new()
-	emote.text = d.get("emoticon", "")
-	emote.visible = d.get("emoticon", "") != ""
-	emote.mouse_filter = MOUSE_FILTER_IGNORE
-	top.add_child(emote)
 
 	var nlbl := Label.new()
 	nlbl.text = d["name"]
@@ -342,8 +392,9 @@ func _create_card(id: String) -> void:
 		nlbl.add_theme_font_override("font", _bold_font)
 	top.add_child(nlbl)
 
-	# Letter badge (top-right, inline with title)
-	var letter: String = d.get("unlocks_letter", "")
+	# Secondary Unlock badge (top-right, inline with title — first 3 chars)
+	var sec: String = d.get("secondary_unlock", "")
+	var badge_text: String = sec.left(3) if (sec != "" and sec != "NONE") else ""
 	var badge_sty := StyleBoxFlat.new()
 	badge_sty.set_corner_radius_all(3)
 	badge_sty.bg_color = Color(0, 0, 0, 0)
@@ -352,10 +403,10 @@ func _create_card(id: String) -> void:
 	badge_sty.set_content_margin_all(1)
 	var badge_panel := PanelContainer.new()
 	badge_panel.mouse_filter = MOUSE_FILTER_IGNORE
-	badge_panel.visible = letter != ""
+	badge_panel.visible = badge_text != ""
 	badge_panel.add_theme_stylebox_override("panel", badge_sty)
 	var badge_lbl := Label.new()
-	badge_lbl.text = letter
+	badge_lbl.text = badge_text
 	badge_lbl.add_theme_font_size_override("font_size", 16)
 	badge_lbl.add_theme_color_override("font_color", sty.border_color)
 	badge_lbl.mouse_filter = MOUSE_FILTER_IGNORE
@@ -395,7 +446,7 @@ func _create_card(id: String) -> void:
 	_canvas_clip.add_child(panel)
 	_cards[id] = {
 		"panel": panel, "style": sty,
-		"name_lbl": nlbl, "cost_lbl": clbl, "emote_lbl": emote,
+		"name_lbl": nlbl, "cost_lbl": clbl, "emote_lbl": emote, "icon_tex": icon_tex,
 		"count_spin": spin,
 		"badge_panel": badge_panel, "badge_lbl": badge_lbl, "badge_sty": badge_sty,
 	}
@@ -415,12 +466,12 @@ func _refresh_card(id: String) -> void:
 	c["name_lbl"].text = d["name"]
 	c["cost_lbl"].text = _cost_text(d)
 	var em: String = d.get("emoticon", "")
-	c["emote_lbl"].text = em
-	c["emote_lbl"].visible = em != ""
-	var letter: String = d.get("unlocks_letter", "")
+	_apply_icon(em, c["emote_lbl"], c["icon_tex"])
+	var sec: String = d.get("secondary_unlock", "")
+	var badge_text: String = sec.left(3) if (sec != "" and sec != "NONE") else ""
 	if c.has("badge_lbl") and is_instance_valid(c["badge_lbl"]):
-		c["badge_lbl"].text = letter
-		c["badge_panel"].visible = letter != ""
+		c["badge_lbl"].text = badge_text
+		c["badge_panel"].visible = badge_text != ""
 	var purchased: int = d.get("purchased", 0)
 	var max_val: int   = d.get("max", 1)
 	if c.has("count_spin") and is_instance_valid(c["count_spin"]):
@@ -456,6 +507,37 @@ func _refresh_card(id: String) -> void:
 		c["badge_lbl"].add_theme_color_override("font_color", border_col)
 
 
+const _IMAGE_EXTENSIONS := ["png", "jpg", "jpeg", "svg"]
+
+func _is_image_path(text: String) -> bool:
+	var ext := text.get_extension().to_lower()
+	return ext in _IMAGE_EXTENSIONS
+
+
+func _apply_icon(icon_value: String, emote_lbl: Label, icon_tex: TextureRect) -> void:
+	## Sets either the emoji label or the texture rect visible, depending on
+	## whether icon_value is an image file path or an emoji/symbol string.
+	if icon_value == "":
+		emote_lbl.visible = false
+		icon_tex.visible = false
+		return
+	if _is_image_path(icon_value):
+		emote_lbl.visible = false
+		var tex: Texture2D = null
+		if icon_value.begins_with("res://") and ResourceLoader.exists(icon_value):
+			tex = load(icon_value)
+		elif FileAccess.file_exists(icon_value):
+			var img := Image.new()
+			if img.load(icon_value) == OK:
+				tex = ImageTexture.create_from_image(img)
+		icon_tex.texture = tex
+		icon_tex.visible = tex != null
+	else:
+		icon_tex.visible = false
+		emote_lbl.text = icon_value
+		emote_lbl.visible = true
+
+
 # ── Drawing callback ─────────────────────────────────────────────────────
 
 func _draw_layer(ci: CanvasItem, lid: String) -> void:
@@ -475,12 +557,13 @@ func _paint_arrows(ci: CanvasItem) -> void:
 			continue
 		var fp: Vector2 = _ctx.nodes[fid]["position"]
 		var tp: Vector2 = _ctx.nodes[tid]["position"]
+		var fh: float = _node_h(fid)
 		# Rank-up arrows start from left-center (red dot); others from bottom-center (blue dot)
 		var a: Vector2
 		if conn["type"] == "rank_up":
-			a = _w2s(Vector2(fp.x + 2.0, fp.y + NODE_H * 0.5))
+			a = _w2s(Vector2(fp.x + 2.0, fp.y + fh * 0.5))
 		else:
-			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + NODE_H))
+			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + fh))
 		var b := _w2s(Vector2(tp.x + NODE_W * 0.5, tp.y))
 
 		var conn_type: String = conn["type"]
@@ -498,13 +581,14 @@ func _paint_arrows(ci: CanvasItem) -> void:
 	# Temp connection preview
 	if _conn_from != "" and _ctx.nodes.has(_conn_from):
 		var fp: Vector2 = _ctx.nodes[_conn_from]["position"]
+		var fh: float = _node_h(_conn_from)
 		var a: Vector2
 		var col: Color
 		if _conn_is_rankup:
-			a = _w2s(Vector2(fp.x + 2.0, fp.y + NODE_H * 0.5))
+			a = _w2s(Vector2(fp.x + 2.0, fp.y + fh * 0.5))
 			col = Color(1.00, 0.25, 0.25, 0.65)
 		else:
-			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + NODE_H))
+			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + fh))
 			var is_p: bool = _ctx.current_arrow_type == _ctx.ArrowType.PURCHASED
 			col = Color(0.30, 0.90, 0.40, 0.65) if is_p else Color(1.00, 0.80, 0.15, 0.65)
 		var end_s := _w2s(_conn_end)
@@ -572,15 +656,16 @@ func _paint_overlay(ci: CanvasItem) -> void:
 	for id in _ctx.nodes:
 		var d: Dictionary = _ctx.nodes[id]
 		var p: Vector2 = d["position"]
+		var nh: float = _node_h(id)
 
 		# Blue handle dot (bottom-center) — for purchased/maxed arrows
-		var hc := _w2s(Vector2(p.x + NODE_W * 0.5, p.y + NODE_H - 2.0))
+		var hc := _w2s(Vector2(p.x + NODE_W * 0.5, p.y + nh))
 		var hr := HANDLE_RADIUS * _cam_zoom
 		ci.draw_circle(hc, hr, Color(0.40, 0.62, 1.00, 0.85))
 		ci.draw_circle(hc, maxf(hr - 2.0 * _cam_zoom, 1.0), Color(0.28, 0.48, 0.88, 0.50))
 
 		# Red handle dot (left-center) — for rank-up arrows only
-		var rc := _w2s(Vector2(p.x + 2.0, p.y + NODE_H * 0.5))
+		var rc := _w2s(Vector2(p.x + 2.0, p.y + nh * 0.5))
 		ci.draw_circle(rc, hr, Color(1.00, 0.30, 0.30, 0.85))
 		ci.draw_circle(rc, maxf(hr - 2.0 * _cam_zoom, 1.0), Color(0.85, 0.18, 0.18, 0.50))
 
@@ -644,6 +729,15 @@ func _on_mbtn(ev: InputEventMouseButton) -> void:
 		else:
 			_lrelease(sp, wp)
 		_canvas_clip.accept_event()
+		return
+
+	# ── Right click ── (gold/maxed arrows + toggle)
+	if ev.button_index == MOUSE_BUTTON_RIGHT:
+		if ev.pressed:
+			_rpress(sp, wp)
+		else:
+			_rrelease(sp, wp)
+		_canvas_clip.accept_event()
 
 
 func _lpress(_sp: Vector2, wp: Vector2, is_double: bool = false) -> void:
@@ -664,7 +758,7 @@ func _lpress(_sp: Vector2, wp: Vector2, is_double: bool = false) -> void:
 		_rebuild_cards()
 		return
 
-	# ── CREATE / EDIT mode ──
+	# ── CREATE mode ──
 
 	# Red rank-up handle → start rank-up connection drag
 	var rid := _hit_rank_handle(wp)
@@ -674,32 +768,37 @@ func _lpress(_sp: Vector2, wp: Vector2, is_double: bool = false) -> void:
 		_conn_is_rankup = true
 		return
 
-	# Blue handle → start normal connection drag
+	# Blue handle → start green (purchased) connection drag
 	var hid := _hit_handle(wp)
 	if hid != "":
 		_conn_from = hid
 		_conn_end = wp
 		_conn_is_rankup = false
+		_ctx.current_arrow_type = _ctx.ArrowType.PURCHASED
 		return
 
-	# Node → select (+ drag in create mode)
+	# Connection → left-click toggles gold→green
+	var ci := _hit_connection(wp)
+	if ci >= 0:
+		var conn: Dictionary = _ctx.connections[ci]
+		if conn["type"] == "maxed":
+			_ctx.assign_connection_type_at(ci, "purchased")
+			_redraw_arrows()
+			return
+		_ctx.selected_connection_index = ci
+		_ctx.selected_skill_id = ""
+		_rebuild_cards()
+		_redraw_arrows()
+		return
+
+	# Node → select + drag
 	var nid := _hit_node(wp)
 	if nid != "":
 		_ctx.selected_skill_id = nid
 		_ctx.selected_connection_index = -1
 		_rebuild_cards()
-		if m == _ctx.Mode.CREATE:
-			_drag_id = nid
-			_drag_off = _ctx.nodes[nid]["position"] - wp
-		return
-
-	# Connection → select
-	var ci := _hit_connection(wp)
-	if ci >= 0:
-		_ctx.selected_connection_index = ci
-		_ctx.selected_skill_id = ""
-		_rebuild_cards()
-		_redraw_arrows()
+		_drag_id = nid
+		_drag_off = _ctx.nodes[nid]["position"] - wp
 		return
 
 	# Empty space
@@ -708,7 +807,7 @@ func _lpress(_sp: Vector2, wp: Vector2, is_double: bool = false) -> void:
 	_rebuild_cards()
 	_redraw_arrows()
 
-	if m == _ctx.Mode.CREATE and is_double:
+	if is_double:
 		var id = _ctx.generate_id()
 		_ctx.add_node(id, _blank(wp - Vector2(NODE_W * 0.5, NODE_H * 0.5)))
 		_ctx.selected_skill_id = id
@@ -745,6 +844,44 @@ func _lrelease(_sp: Vector2, wp: Vector2) -> void:
 		_rebuild_cards()
 
 
+func _rpress(_sp: Vector2, wp: Vector2) -> void:
+	if _ctx.current_mode == _ctx.Mode.DELETE:
+		return
+
+	# Blue handle → start gold (maxed) connection drag
+	var hid := _hit_handle(wp)
+	if hid != "":
+		_conn_from = hid
+		_conn_end = wp
+		_conn_is_rankup = false
+		_ctx.current_arrow_type = _ctx.ArrowType.MAXED
+		return
+
+	# Connection → right-click toggles green→gold
+	var ci := _hit_connection(wp)
+	if ci >= 0:
+		var conn: Dictionary = _ctx.connections[ci]
+		if conn["type"] == "purchased":
+			_ctx.assign_connection_type_at(ci, "maxed")
+			_redraw_arrows()
+		return
+
+
+func _rrelease(_sp: Vector2, wp: Vector2) -> void:
+	if _conn_from != "" and not _conn_is_rankup:
+		var target := _hit_node(wp)
+		if target != "" and target != _conn_from:
+			_ctx.add_connection(_conn_from, target, _ctx.get_arrow_type_string())
+		elif target == "" and _ctx.current_mode == _ctx.Mode.CREATE:
+			var id = _ctx.generate_id()
+			_ctx.add_node(id, _blank(wp - Vector2(NODE_W * 0.5, 0)))
+			_ctx.add_connection(_conn_from, id, _ctx.get_arrow_type_string())
+			_ctx.selected_skill_id = id
+		_conn_from = ""
+		_redraw_arrows()
+		_rebuild_cards()
+
+
 func _on_mmove(ev: InputEventMouseMotion) -> void:
 	if _panning:
 		_cam_off += ev.relative
@@ -768,12 +905,19 @@ func _on_mmove(ev: InputEventMouseMotion) -> void:
 
 # ── Hit testing (world space) ─────────────────────────────────────────────
 
+func _node_h(id: String) -> float:
+	if _cards.has(id) and is_instance_valid(_cards[id]["panel"]):
+		var h: float = _cards[id]["panel"].size.y
+		if h > 1.0:
+			return h
+	return NODE_H
+
 func _hit_node(wp: Vector2) -> String:
 	# Iterate in reverse so top-most card wins
 	var ids = _ctx.nodes.keys()
 	for i in range(ids.size() - 1, -1, -1):
 		var id: String = ids[i]
-		var r := Rect2(_ctx.nodes[id]["position"], Vector2(NODE_W, NODE_H))
+		var r := Rect2(_ctx.nodes[id]["position"], Vector2(NODE_W, _node_h(id)))
 		if r.has_point(wp):
 			return id
 	return ""
@@ -781,7 +925,7 @@ func _hit_node(wp: Vector2) -> String:
 func _hit_handle(wp: Vector2) -> String:
 	for id in _ctx.nodes:
 		var p: Vector2 = _ctx.nodes[id]["position"]
-		var hc := Vector2(p.x + NODE_W * 0.5, p.y + NODE_H - 2.0)
+		var hc := Vector2(p.x + NODE_W * 0.5, p.y + _node_h(id))
 		if wp.distance_to(hc) <= HANDLE_RADIUS + 5.0:
 			return id
 	return ""
@@ -789,7 +933,7 @@ func _hit_handle(wp: Vector2) -> String:
 func _hit_rank_handle(wp: Vector2) -> String:
 	for id in _ctx.nodes:
 		var p: Vector2 = _ctx.nodes[id]["position"]
-		var rc := Vector2(p.x + 2.0, p.y + NODE_H * 0.5)
+		var rc := Vector2(p.x + 2.0, p.y + _node_h(id) * 0.5)
 		if wp.distance_to(rc) <= HANDLE_RADIUS + 5.0:
 			return id
 	return ""
@@ -809,7 +953,7 @@ func _hit_connection(wp: Vector2) -> int:
 			continue
 		var fp: Vector2 = _ctx.nodes[c["from"]]["position"]
 		var tp: Vector2 = _ctx.nodes[c["to"]]["position"]
-		var a := Vector2(fp.x + NODE_W * 0.5, fp.y + NODE_H)
+		var a := Vector2(fp.x + NODE_W * 0.5, fp.y + _node_h(c["from"]))
 		var b := Vector2(tp.x + NODE_W * 0.5, tp.y)
 		if _near_seg(wp, a, b, ARROW_HIT_DIST):
 			return i
@@ -826,24 +970,27 @@ func _near_seg(p: Vector2, a: Vector2, b: Vector2, thr: float) -> bool:
 
 # ── Toolbar callbacks ────────────────────────────────────────────────────
 
-func _on_mode(m: int) -> void:
-	_ctx.current_mode = m
-
-func _on_arrow_toggle() -> void:
-	if _arrow_btn.button_pressed:
-		_ctx.current_arrow_type = _ctx.ArrowType.MAXED
-		_arrow_btn.text = "Arrow: Maxed"
-		_arrow_btn.add_theme_color_override("font_color", Color(1.00, 0.80, 0.15))
+func _toggle_mode() -> void:
+	if _ctx.current_mode == _ctx.Mode.CREATE:
+		_ctx.current_mode = _ctx.Mode.DELETE
 	else:
-		_ctx.current_arrow_type = _ctx.ArrowType.PURCHASED
-		_arrow_btn.text = "Arrow: Unlock"
-		_arrow_btn.add_theme_color_override("font_color", Color(0.30, 0.90, 0.40))
-	if _ctx.selected_connection_index >= 0:
-		var sel_conn: Dictionary = _ctx.connections[_ctx.selected_connection_index]
-		if sel_conn["type"] != "rank_up":
-			_ctx.assign_connection_type_at(_ctx.selected_connection_index, _ctx.get_arrow_type_string())
-			_redraw_arrows()
+		_ctx.current_mode = _ctx.Mode.CREATE
 
+
+func _update_mode_toggle_icon() -> void:
+	if not is_instance_valid(_mode_toggle):
+		return
+	if not Engine.is_editor_hint():
+		return
+	var base := EditorInterface.get_base_control()
+	if _ctx.current_mode == _ctx.Mode.CREATE:
+		_mode_toggle.icon = base.get_theme_icon("Edit", "EditorIcons")
+		_mode_toggle.tooltip_text = "Create mode (click to switch to Delete)"
+		_mode_toggle.self_modulate = Color.WHITE
+	else:
+		_mode_toggle.icon = base.get_theme_icon("Clear", "EditorIcons")
+		_mode_toggle.tooltip_text = "Delete mode (click to switch to Create)"
+		_mode_toggle.self_modulate = Color(0.95, 0.35, 0.35)
 
 
 # ── File operations ──────────────────────────────────────────────────────
@@ -971,7 +1118,7 @@ func _blank(pos: Vector2) -> Dictionary:
 		"effect": "NONE", "value": 0.0, "position": pos,
 		"emoticon": "", "image": "",
 		"unlocks_on_purchase": 0, "unlocks_on_max": 0, "has_rank_up_child": false,
-		"group": "", "purchased": 0, "unlocks_letter": "",
+		"group": "", "purchased": 0, "secondary_unlock": "",
 	}
 
 
@@ -991,7 +1138,7 @@ func _rank_up_child_template(parent_id: String, wp: Vector2) -> Dictionary:
 		"image": "",
 		"unlocks_on_purchase": 0, "unlocks_on_max": 0, "has_rank_up_child": false,
 		"group": p.get("group", ""),
-		"purchased": 0, "unlocks_letter": "",
+		"purchased": 0, "secondary_unlock": "",
 	}
 
 

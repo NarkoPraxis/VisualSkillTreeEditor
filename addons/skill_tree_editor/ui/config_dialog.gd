@@ -17,6 +17,13 @@ var _eff_add_btn: Button
 var _eff_rename_btn: Button
 var _eff_remove_btn: Button
 
+# ── Secondary Unlocks tab refs ──────────────────────────────────────────
+var _sec_list: ItemList
+var _sec_field: LineEdit
+var _sec_add_btn: Button
+var _sec_rename_btn: Button
+var _sec_remove_btn: Button
+
 # ── Groups tab refs ─────────────────────────────────────────────────────
 var _grp_tree: Tree
 var _grp_flag_field: LineEdit
@@ -52,6 +59,7 @@ func _build_ui() -> void:
 	_tabs = TabBar.new()
 	_tabs.add_tab("Effects")
 	_tabs.add_tab("Groups")
+	_tabs.add_tab("Secondary Unlocks")
 	_tabs.tab_changed.connect(_on_tab_changed)
 	root.add_child(_tabs)
 
@@ -65,6 +73,11 @@ func _build_ui() -> void:
 	root.add_child(grp_page)
 	_pages.append(grp_page)
 
+	var sec_page := _build_secondary_page()
+	sec_page.visible = false
+	root.add_child(sec_page)
+	_pages.append(sec_page)
+
 	add_child(root)
 
 
@@ -77,11 +90,21 @@ func _on_tab_changed(idx: int) -> void:
 	elif idx == 1:
 		_refresh_groups()
 		_grp_flag_field.call_deferred("grab_focus")
+	elif idx == 2:
+		_refresh_secondary()
+		_sec_field.call_deferred("grab_focus")
 
+
+var _start_tab: int = 0
+
+func open_to_tab(tab: int = 0) -> void:
+	_start_tab = tab
+	popup_centered(Vector2i(560, 520))
 
 func _on_about_to_popup() -> void:
-	_tabs.current_tab = 0
-	_on_tab_changed(0)
+	_tabs.current_tab = _start_tab
+	_on_tab_changed(_start_tab)
+	_start_tab = 0
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -184,7 +207,7 @@ func _do_eff_add(text: String) -> void:
 			_eff_list.ensure_current_is_visible()
 			_update_eff_buttons(true)
 			break
-	_eff_field.grab_focus()
+	_eff_field.call_deferred("grab_focus")
 
 
 func _do_eff_rename() -> void:
@@ -203,7 +226,7 @@ func _do_eff_rename() -> void:
 			_eff_list.select(i)
 			_eff_list.ensure_current_is_visible()
 			break
-	_eff_field.grab_focus()
+	_eff_field.call_deferred("grab_focus")
 
 
 func _do_eff_remove() -> void:
@@ -519,3 +542,170 @@ func _on_grp_effects_list_input(event: InputEvent) -> void:
 		if event.keycode == KEY_DELETE:
 			_do_grp_unassign()
 			get_viewport().set_input_as_handled()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECONDARY UNLOCKS TAB
+# ═══════════════════════════════════════════════════════════════════════
+
+func _build_secondary_page() -> VBoxContainer:
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+
+	_sec_list = ItemList.new()
+	_sec_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_sec_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sec_list.select_mode = ItemList.SELECT_SINGLE
+	_sec_list.allow_reselect = true
+	_sec_list.custom_minimum_size = Vector2(0, 200)
+	_sec_list.item_selected.connect(_on_sec_item_selected)
+	_sec_list.gui_input.connect(_on_sec_list_input)
+	vbox.add_child(_sec_list)
+
+	var add_row := HBoxContainer.new()
+	add_row.add_theme_constant_override("separation", 4)
+	_sec_field = LineEdit.new()
+	_sec_field.placeholder_text = "Type unlock name, press Enter"
+	_sec_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_sec_field.text_submitted.connect(_on_sec_add_submitted)
+	_sec_field.gui_input.connect(_on_sec_field_input)
+	add_row.add_child(_sec_field)
+	_sec_add_btn = Button.new()
+	_sec_add_btn.text = "Add"
+	_sec_add_btn.pressed.connect(func(): _do_sec_add(_sec_field.text))
+	add_row.add_child(_sec_add_btn)
+	vbox.add_child(add_row)
+
+	var action_row := HBoxContainer.new()
+	action_row.add_theme_constant_override("separation", 4)
+	_sec_rename_btn = Button.new()
+	_sec_rename_btn.text = "Rename (F2)"
+	_sec_rename_btn.tooltip_text = "Rename selected unlock to the text in the field above"
+	_sec_rename_btn.pressed.connect(_do_sec_rename)
+	_sec_rename_btn.disabled = true
+	action_row.add_child(_sec_rename_btn)
+	_sec_remove_btn = Button.new()
+	_sec_remove_btn.text = "Remove (Del)"
+	_sec_remove_btn.tooltip_text = "Remove selected unlock (nodes using it reset to NONE)"
+	_sec_remove_btn.pressed.connect(_do_sec_remove)
+	_sec_remove_btn.disabled = true
+	action_row.add_child(_sec_remove_btn)
+	vbox.add_child(action_row)
+
+	return vbox
+
+
+func _refresh_secondary() -> void:
+	var prev_sel := -1
+	if _sec_list.get_selected_items().size() > 0:
+		prev_sel = _sec_list.get_selected_items()[0]
+	_sec_list.clear()
+	for sname in _ctx.custom_secondary_unlocks:
+		_sec_list.add_item(sname)
+	if prev_sel >= 0 and prev_sel < _sec_list.item_count:
+		_sec_list.select(prev_sel)
+		_update_sec_buttons(true)
+	else:
+		_update_sec_buttons(false)
+
+
+func _update_sec_buttons(has_sel: bool) -> void:
+	_sec_rename_btn.disabled = not has_sel
+	_sec_remove_btn.disabled = not has_sel
+
+
+func _on_sec_item_selected(_index: int) -> void:
+	_update_sec_buttons(true)
+
+
+func _on_sec_add_submitted(text: String) -> void:
+	_do_sec_add(text)
+
+
+func _do_sec_add(text: String) -> void:
+	var clean := _sanitize(text)
+	if clean == "":
+		return
+	if _ctx.custom_secondary_unlocks.has(clean):
+		_sec_field.clear()
+		return
+	_ctx.add_secondary_unlock(clean)
+	_sec_field.clear()
+	_refresh_secondary()
+	for i in range(_sec_list.item_count):
+		if _sec_list.get_item_text(i) == clean:
+			_sec_list.select(i)
+			_sec_list.ensure_current_is_visible()
+			_update_sec_buttons(true)
+			break
+	_sec_field.call_deferred("grab_focus")
+
+
+func _do_sec_rename() -> void:
+	var sel := _sec_list.get_selected_items()
+	if sel.size() == 0:
+		return
+	var old_name: String = _sec_list.get_item_text(sel[0])
+	var new_name := _sanitize(_sec_field.text)
+	if new_name == "" or new_name == old_name:
+		return
+	_ctx.rename_secondary_unlock(old_name, new_name)
+	_sec_field.clear()
+	_refresh_secondary()
+	for i in range(_sec_list.item_count):
+		if _sec_list.get_item_text(i) == new_name:
+			_sec_list.select(i)
+			_sec_list.ensure_current_is_visible()
+			break
+	_sec_field.call_deferred("grab_focus")
+
+
+func _do_sec_remove() -> void:
+	var sel := _sec_list.get_selected_items()
+	if sel.size() == 0:
+		return
+	var sname: String = _sec_list.get_item_text(sel[0])
+	_ctx.remove_secondary_unlock(sname)
+	_refresh_secondary()
+
+
+func _on_sec_list_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_DELETE:
+			_do_sec_remove()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			var sel := _sec_list.get_selected_items()
+			if sel.size() > 0:
+				_sec_field.text = _sec_list.get_item_text(sel[0])
+				_sec_field.grab_focus()
+				_sec_field.select_all()
+			get_viewport().set_input_as_handled()
+
+
+func _on_sec_field_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_F2:
+			_do_sec_rename()
+			get_viewport().set_input_as_handled()
+		elif _sec_field.text.strip_edges() == "":
+			if event.keycode == KEY_UP:
+				_move_sec_selection(-1)
+				get_viewport().set_input_as_handled()
+			elif event.keycode == KEY_DOWN:
+				_move_sec_selection(1)
+				get_viewport().set_input_as_handled()
+
+
+func _move_sec_selection(delta: int) -> void:
+	if _sec_list.item_count == 0:
+		return
+	var sel := _sec_list.get_selected_items()
+	var idx := 0
+	if sel.size() > 0:
+		idx = clampi(sel[0] + delta, 0, _sec_list.item_count - 1)
+	_sec_list.select(idx)
+	_sec_list.ensure_current_is_visible()
+	_update_sec_buttons(true)
