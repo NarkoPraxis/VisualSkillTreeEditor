@@ -1,0 +1,341 @@
+{
+	"connections": [
+		{
+			"from": "node_1",
+			"to": "node_2",
+			"type": "purchased"
+		},
+		{
+			"from": "node_2",
+			"to": "node_3",
+			"type": "purchased"
+		},
+		{
+			"from": "node_1",
+			"to": "node_4",
+			"type": "maxed"
+		},
+		{
+			"from": "node_4",
+			"to": "node_5",
+			"type": "maxed"
+		},
+		{
+			"from": "node_1",
+			"to": "node_6",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_6",
+			"to": "node_7",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_7",
+			"to": "node_8",
+			"type": "rank_up"
+		}
+	],
+	"effects": [
+		"NONE",
+		"DAMAGE",
+		"ATTACK_SPEED",
+		"CRITICAL_CHANCE",
+		"CRITICAL_DAMAGE",
+		"HEALTH",
+		"HEALTH_REGEN",
+		"ARMOR",
+		"EVASION",
+		"MANA",
+		"MANA_REGEN",
+		"COOLDOWN_REDUCTION",
+		"SPELL_POWER",
+		"MOVEMENT_SPEED",
+		"JUMP_HEIGHT",
+		"DASH_DISTANCE",
+		"EXPERIENCE_BONUS",
+		"GOLD_BONUS",
+		"LUCK",
+		"ITEM_FIND",
+		"FIRE_DAMAGE",
+		"ICE_DAMAGE",
+		"LIGHTNING_DAMAGE",
+		"POISON_DAMAGE",
+		"FIRE_RESIST",
+		"ICE_RESIST",
+		"LIGHTNING_RESIST",
+		"POISON_RESIST",
+		"LIFESTEAL",
+		"THORNS",
+		"STUN_CHANCE",
+		"KNOCKBACK",
+		"SUMMON_DAMAGE",
+		"SUMMON_HEALTH",
+		"SUMMON_COUNT",
+		"AREA_OF_EFFECT",
+		"PROJECTILE_COUNT",
+		"PROJECTILE_SPEED",
+		"CUSTOM_1",
+		"CUSTOM_2",
+		"CUSTOM_3",
+		"CUSTOM_4",
+		"CUSTOM_5"
+	],
+	"groups": [
+		{
+			"effects": [
+				"DAMAGE",
+				"ATTACK_SPEED",
+				"CRITICAL_CHANCE",
+				"CRITICAL_DAMAGE",
+				"FIRE_DAMAGE",
+				"ICE_DAMAGE",
+				"LIGHTNING_DAMAGE",
+				"POISON_DAMAGE"
+			],
+			"flag": "-o",
+			"label": "OFFENSE"
+		},
+		{
+			"effects": [
+				"HEALTH",
+				"HEALTH_REGEN",
+				"ARMOR",
+				"EVASION",
+				"FIRE_RESIST",
+				"ICE_RESIST",
+				"LIGHTNING_RESIST",
+				"POISON_RESIST"
+			],
+			"flag": "-d",
+			"label": "DEFENSE"
+		},
+		{
+			"effects": [
+				"MANA",
+				"MANA_REGEN",
+				"COOLDOWN_REDUCTION",
+				"SPELL_POWER",
+				"AREA_OF_EFFECT",
+				"PROJECTILE_COUNT",
+				"PROJECTILE_SPEED"
+			],
+			"flag": "-m",
+			"label": "MAGIC"
+		},
+		{
+			"effects": [
+				"MOVEMENT_SPEED",
+				"JUMP_HEIGHT",
+				"DASH_DISTANCE",
+				"EXPERIENCE_BONUS",
+				"GOLD_BONUS",
+				"LUCK",
+				"ITEM_FIND"
+			],
+			"flag": "-u",
+			"label": "UTILITY"
+		},
+		{
+			"effects": [
+				"LIFESTEAL",
+				"THORNS",
+				"STUN_CHANCE",
+				"KNOCKBACK"
+			],
+			"flag": "-p",
+			"label": "PASSIVE"
+		},
+		{
+			"effects": [
+				"SUMMON_DAMAGE",
+				"SUMMON_HEALTH",
+				"SUMMON_COUNT"
+			],
+			"flag": "-s",
+			"label": "SUMMONS"
+		},
+		{
+			"effects": [
+				"CUSTOM_1",
+				"CUSTOM_2",
+				"CUSTOM_3",
+				"CUSTOM_4",
+				"CUSTOM_5"
+			],
+			"flag": "-x",
+			"label": "CUSTOM"
+		}
+	],
+	"next_id": 8,
+	"nodes": {
+		"node_1": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "ICE_DAMAGE",
+			"emoticon": "😉",
+			"exponential": false,
+			"group": "-p",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				601.5,
+				-122.25
+			],
+			"purchased": 1,
+			"unlocks_letter": "",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 1,
+			"value": 0.0
+		},
+		"node_2": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				436.5,
+				102.5
+			],
+			"purchased": 0,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 0.0
+		},
+		"node_3": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				312.75,
+				263.75
+			],
+			"purchased": 0,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_4": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				737.75,
+				90.0
+			],
+			"purchased": 0,
+			"unlocks_letter": "",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_5": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				752.75,
+				236.25
+			],
+			"purchased": 0,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_6": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill I",
+			"position": [
+				335.25,
+				-61.25
+			],
+			"purchased": 1,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_7": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill I I",
+			"position": [
+				71.5000152587891,
+				-22.5
+			],
+			"purchased": 1,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_8": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill I I I",
+			"position": [
+				-178.499984741211,
+				28.75
+			],
+			"purchased": 0,
+			"unlocks_letter": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		}
+	}
+}

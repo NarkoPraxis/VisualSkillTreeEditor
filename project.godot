@@ -1,0 +1,27 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[animation]
+
+compatibility/default_parent_skeleton_in_mesh_instance_3d=true
+
+[application]
+
+config/name="Skill Tree Editor"
+config/description="Visual skill tree editor plugin for Godot 4.x. Design skill definitions, prerequisites, costs, and unlock order in a dedicated canvas view."
+config/features=PackedStringArray("4.6")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/skill_tree_editor/plugin.cfg")
+
+[skill_tree_editor]
+
+skill_config_path="res://addons/skill_tree_editor/example_config.json"
