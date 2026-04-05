@@ -74,7 +74,12 @@
 		"SUMMON_COUNT",
 		"AREA_OF_EFFECT",
 		"PROJECTILE_COUNT",
-		"PROJECTILE_SPEED"
+		"PROJECTILE_SPEED",
+		"CUSTOM_1",
+		"CUSTOM_2",
+		"CUSTOM_3",
+		"CUSTOM_4",
+		"CUSTOM_5"
 	],
 	"groups": [
 		{
@@ -145,29 +150,14 @@
 			"label": "SUMMONS"
 		},
 		{
-			"effects": [],
-			"label": "CUSTOM"
-		},
-		{
-			"effects": [],
-			"label": "TEST"
-		},
-		{
-			"effects": [],
-			"label": "ETSET"
-		},
-		{
 			"effects": [
-				"POISON_DAMAGE",
-				"ICE_DAMAGE",
-				"LIGHTNING_DAMAGE",
-				"ITEM_FIND",
-				"EXPERIENCE_BONUS",
-				"JUMP_HEIGHT",
-				"MOVEMENT_SPEED",
-				"COOLDOWN_REDUCTION"
+				"CUSTOM_1",
+				"CUSTOM_2",
+				"CUSTOM_3",
+				"CUSTOM_4",
+				"CUSTOM_5"
 			],
-			"label": "SET"
+			"label": "CUSTOM"
 		}
 	],
 	"next_id": 8,
@@ -184,8 +174,8 @@
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				601.5,
-				-122.25
+				544.978271484375,
+				-180.945648193359
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -260,16 +250,16 @@
 			"cost": 100,
 			"cost_increase": 0,
 			"description": "",
-			"effect": "NONE",
+			"effect": "HEALTH",
 			"emoticon": "",
 			"exponential": false,
-			"group": "",
+			"group": "DEFENSE",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				752.75,
-				236.25
+				799.972229003906,
+				232.083343505859
 			],
 			"purchased": 0,
 			"secondary_unlock": "",
@@ -289,8 +279,8 @@
 			"max": 1,
 			"name": "New Skill I",
 			"position": [
-				335.25,
-				-61.25
+				291.771759033203,
+				-79.7282562255859
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -310,8 +300,8 @@
 			"max": 1,
 			"name": "New Skill I I",
 			"position": [
-				71.5000152587891,
-				-22.5
+				78.0217590332031,
+				-2.93478274345398
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -331,8 +321,8 @@
 			"max": 1,
 			"name": "New Skill I I I",
 			"position": [
-				-178.499984741211,
-				28.75
+				-125.239112854004,
+				89.6195678710938
 			],
 			"purchased": 0,
 			"secondary_unlock": "",
@@ -350,6 +340,24 @@
 		"E",
 		"F",
 		"G",
-		"H"
+		"H",
+		"I",
+		"J",
+		"K",
+		"L",
+		"M",
+		"N",
+		"O",
+		"P",
+		"Q",
+		"R",
+		"S",
+		"T",
+		"U",
+		"V",
+		"W",
+		"X",
+		"Y",
+		"Z"
 	]
 }

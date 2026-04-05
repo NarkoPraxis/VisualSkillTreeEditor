@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- 16x16 pencil design scaled 4x to fill 64x64 — rasterises crisp at button size -->
+  <g transform="scale(4)">
+    <g transform="translate(9, 9) rotate(45)">
+      <rect x="-1.8" y="-7"   width="3.6" height="1.8" rx="0.4" fill="#e07070"/>
+      <rect x="-1.8" y="-5.2" width="3.6" height="1.1" fill="#bbbbbb"/>
+      <rect x="-1.8" y="-4.1" width="3.6" height="6.5" rx="0.3" fill="#f5c030"/>
+      <polygon points="-1.8,2.4 1.8,2.4 0,5.6" fill="#d4aa60"/>
+      <polygon points="-0.6,4.6 0.6,4.6 0,5.6" fill="#777"/>
+    </g>
+  </g>
+</svg>

@@ -41,6 +41,20 @@ All scripts use `@tool` annotation to run in the editor. Changes to `.gd` files 
 
 The project setting `skill_tree_editor/skill_config_path` controls which JSON file auto-loads on startup. Set via Tools > Set Skill Config...
 
+## GDScript Type Inference Rules
+
+**Never use `:=` when the right-hand side involves a `Dictionary` field access, a `Variant`, or arithmetic that mixes typed and untyped values.** GDScript cannot infer the type in these cases and will error. Use an explicit type annotation instead.
+
+```gdscript
+# WRONG — entry is a Dictionary, entry.pos is Variant, result is Variant:
+var sc := size / 2.0 + (entry.pos - _camera_pos) * _zoom_level
+
+# CORRECT — cast the Dictionary field, then annotate the variable:
+var sc: Vector2 = size / 2.0 + (entry.pos as Vector2 - _camera_pos) * _zoom_level
+```
+
+The same rule applies any time the result type is ambiguous: arithmetic on `Variant`, ternary expressions returning different types, or return values from functions typed as `Variant`. When in doubt, use `var name: ExplicitType = ...` rather than `:=`.
+
 ## Conventions
 
 - All UI is built programmatically in GDScript (no `.tscn` scene files) — constructing controls in `_build_ui()` / `_ready()` methods.

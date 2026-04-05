@@ -21,6 +21,7 @@
 extends Control
 
 const CanvasDrawLayer = preload("res://addons/skill_tree_editor/ui/canvas_draw_layer.gd")
+const _ICONS := "res://addons/skill_tree_editor/icons/"
 
 # ── Constants ────────────────────────────────────────────────────────────
 
@@ -130,10 +131,10 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 	bar.add_theme_constant_override("separation", 4)
 	parent.add_child(bar)
 
-	bar.add_child(_tb_icon("Save", "Save", _on_save))
-	bar.add_child(_tb("Save As\u2026", _on_save_as))
-	bar.add_child(_tb_icon("Load", "Open\u2026", _on_open))
-	bar.add_child(_tb("Load Game\u2019s Config", _on_load_game_tree))
+	bar.add_child(_tb_file(_ICONS + "icon_save.svg", "Save", _on_save))
+	bar.add_child(_tb_file(_ICONS + "icon_save_as.svg", "Save As\u2026", _on_save_as))
+	bar.add_child(_tb_file(_ICONS + "icon_open.svg", "Open\u2026", _on_open))
+	bar.add_child(_tb_icon_text(_ICONS + "icon_load_game.svg", "Load Game\u2019s Config", _on_load_game_tree))
 
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -147,6 +148,29 @@ func _build_toolbar(parent: VBoxContainer) -> void:
 
 func _tb(text: String, cb: Callable) -> Button:
 	var b := Button.new()
+	b.text = text
+	b.pressed.connect(cb)
+	return b
+
+
+func _tb_file(icon_path: String, tooltip: String, cb: Callable) -> Button:
+	var b := Button.new()
+	var icon := load(icon_path) as Texture2D
+	if icon:
+		b.icon = icon
+	else:
+		b.text = tooltip
+	b.tooltip_text = tooltip
+	b.custom_minimum_size = Vector2(32, 32)
+	b.pressed.connect(cb)
+	return b
+
+
+func _tb_icon_text(icon_path: String, text: String, cb: Callable) -> Button:
+	var b := Button.new()
+	var icon := load(icon_path) as Texture2D
+	if icon:
+		b.icon = icon
 	b.text = text
 	b.pressed.connect(cb)
 	return b
@@ -212,7 +236,8 @@ func _build_mode_toggle() -> void:
 	_mode_toggle.flat = true
 	_mode_toggle.mouse_filter = MOUSE_FILTER_STOP
 	_mode_toggle.z_index = 2
-	_mode_toggle.custom_minimum_size = Vector2(32, 32)
+	_mode_toggle.custom_minimum_size = Vector2(64, 64)
+	_mode_toggle.expand_icon = true
 	_mode_toggle.pressed.connect(_toggle_mode)
 
 	var style := StyleBoxFlat.new()
@@ -227,10 +252,10 @@ func _build_mode_toggle() -> void:
 
 	_canvas_clip.add_child(_mode_toggle)
 	_mode_toggle.set_anchors_preset(PRESET_TOP_RIGHT)
-	_mode_toggle.offset_left = -44
+	_mode_toggle.offset_left = -76
 	_mode_toggle.offset_top = 8
 	_mode_toggle.offset_right = -12
-	_mode_toggle.offset_bottom = 40
+	_mode_toggle.offset_bottom = 72
 
 	_update_mode_toggle_icon()
 
@@ -690,6 +715,13 @@ func _redraw_overlay() -> void:
 
 # ── Input handling ───────────────────────────────────────────────────────
 
+func _unhandled_key_input(ev: InputEvent) -> void:
+	if ev is InputEventKey and ev.pressed and not ev.echo:
+		if ev.keycode == KEY_QUOTELEFT:
+			_toggle_mode()
+			get_viewport().set_input_as_handled()
+
+
 func _on_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton:
 		_on_mbtn(ev as InputEventMouseButton)
@@ -980,15 +1012,12 @@ func _toggle_mode() -> void:
 func _update_mode_toggle_icon() -> void:
 	if not is_instance_valid(_mode_toggle):
 		return
-	if not Engine.is_editor_hint():
-		return
-	var base := EditorInterface.get_base_control()
 	if _ctx.current_mode == _ctx.Mode.CREATE:
-		_mode_toggle.icon = base.get_theme_icon("Edit", "EditorIcons")
+		_mode_toggle.icon = load(_ICONS + "icon_create_mode.svg")
 		_mode_toggle.tooltip_text = "Create mode (click to switch to Delete)"
 		_mode_toggle.self_modulate = Color.WHITE
 	else:
-		_mode_toggle.icon = base.get_theme_icon("Clear", "EditorIcons")
+		_mode_toggle.icon = load(_ICONS + "icon_delete_mode.svg")
 		_mode_toggle.tooltip_text = "Delete mode (click to switch to Create)"
 		_mode_toggle.self_modulate = Color(0.95, 0.35, 0.35)
 

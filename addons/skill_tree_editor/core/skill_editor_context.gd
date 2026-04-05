@@ -78,7 +78,7 @@ var _next_id: int = 0
 ## Array of effect name strings, e.g. ["NONE", "DAMAGE", "HEALTH", ...]
 var custom_effects: PackedStringArray = []
 
-## Array of { flag:String, label:String, effects:PackedStringArray }
+## Array of { label:String, effects:PackedStringArray }
 var custom_groups: Array = []
 
 ## Array of secondary unlock name strings, e.g. ["NONE", "A", "B", ...]
@@ -105,21 +105,21 @@ func _load_defaults() -> void:
 		"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5",
 	])
 	custom_groups = [
-		{"flag": "-e", "label": "ECONOMY", "effects": PackedStringArray([
+		{"label": "ECONOMY", "effects": PackedStringArray([
 			"MONEY_GAIN", "MONEY_MULTIPLIER", "CLICK_POWER", "CLICK_MULTIPLIER",
 			"PRESTIGE_BONUS", "PRESTIGE_MULTIPLIER"])},
-		{"flag": "-c", "label": "COMBAT", "effects": PackedStringArray([
+		{"label": "COMBAT", "effects": PackedStringArray([
 			"CRIT_RATE", "CRIT_DAMAGE", "CHAIN_LIGHTNING", "COMBO_BONUS",
 			"AREA_OF_EFFECT", "PROJECTILE_COUNT", "PROJECTILE_SPEED"])},
-		{"flag": "-p", "label": "PRODUCTION", "effects": PackedStringArray([
+		{"label": "PRODUCTION", "effects": PackedStringArray([
 			"AUTO_CLICK", "IDLE_SPEED", "SPAWN_RATE", "SPAWN_AMOUNT",
 			"MERGE_SPEED", "MERGE_VALUE"])},
-		{"flag": "-r", "label": "PROGRESSION", "effects": PackedStringArray([
+		{"label": "PROGRESSION", "effects": PackedStringArray([
 			"EXPERIENCE_GAIN", "LEVEL_SPEED", "UNLOCK_SPEED",
 			"UPGRADE_DISCOUNT", "COOLDOWN_REDUCTION", "DURATION_BONUS"])},
-		{"flag": "-d", "label": "DROP", "effects": PackedStringArray([
+		{"label": "DROP", "effects": PackedStringArray([
 			"DROP_RATE", "DROP_QUALITY", "OFFLINE_EARNINGS"])},
-		{"flag": "-x", "label": "CUSTOM", "effects": PackedStringArray([
+		{"label": "CUSTOM", "effects": PackedStringArray([
 			"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5"])},
 	]
 	custom_secondary_unlocks = PackedStringArray(["NONE"])
@@ -313,19 +313,19 @@ func get_effect_names() -> PackedStringArray:
 
 
 func get_group_options() -> Array:
-	## Returns [{ "flag": String, "label": String }] for dropdown population.
-	var out: Array = [{"flag": "", "label": "(none)"}]
+	## Returns [{ "label": String }] for dropdown population.
+	var out: Array = [{"label": "(none)"}]
 	for g in custom_groups:
-		out.append({"flag": g["flag"], "label": g["label"]})
+		out.append({"label": g["label"]})
 	return out
 
 
 func get_group_for_effect(effect_name: String) -> String:
-	## Returns the group flag that contains the given effect, or "" if none.
+	## Returns the group label that contains the given effect, or "" if none.
 	for g in custom_groups:
 		var effs: PackedStringArray = g.get("effects", PackedStringArray())
 		if effs.has(effect_name):
-			return g["flag"]
+			return g["label"]
 	return ""
 
 
@@ -385,55 +385,47 @@ func rename_effect(old_name: String, new_name: String) -> void:
 	data_changed.emit()
 
 
-func add_group(flag: String, label: String, effects: PackedStringArray = PackedStringArray()) -> void:
+func add_group(label: String, effects: PackedStringArray = PackedStringArray()) -> void:
 	for g in custom_groups:
-		if g["flag"] == flag:
+		if g["label"] == label:
 			return
-	custom_groups.append({"flag": flag, "label": label, "effects": effects})
+	custom_groups.append({"label": label, "effects": effects})
 	data_changed.emit()
 
 
-func remove_group(flag: String) -> void:
+func remove_group(label: String) -> void:
 	for i in range(custom_groups.size()):
-		if custom_groups[i]["flag"] == flag:
+		if custom_groups[i]["label"] == label:
 			custom_groups.remove_at(i)
-			# Cascade: clear group from any nodes using this flag
+			# Cascade: clear group from any nodes using this label
 			for nid in nodes:
-				if nodes[nid].get("group", "") == flag:
+				if nodes[nid].get("group", "") == label:
 					nodes[nid]["group"] = ""
 			data_changed.emit()
 			return
 
 
-func update_group(flag: String, new_label: String) -> void:
-	for g in custom_groups:
-		if g["flag"] == flag:
-			g["label"] = new_label
-			data_changed.emit()
-			return
-
-
-func update_group_flag(old_flag: String, new_flag: String) -> void:
-	if old_flag == new_flag or new_flag == "":
+func rename_group(old_label: String, new_label: String) -> void:
+	if old_label == new_label or new_label == "":
 		return
-	# Reject if new flag already exists
+	# Reject if new label already exists
 	for g in custom_groups:
-		if g["flag"] == new_flag:
+		if g["label"] == new_label:
 			return
 	for g in custom_groups:
-		if g["flag"] == old_flag:
-			g["flag"] = new_flag
+		if g["label"] == old_label:
+			g["label"] = new_label
 			# Cascade to nodes
 			for nid in nodes:
-				if nodes[nid].get("group", "") == old_flag:
-					nodes[nid]["group"] = new_flag
+				if nodes[nid].get("group", "") == old_label:
+					nodes[nid]["group"] = new_label
 			data_changed.emit()
 			return
 
 
-func add_effect_to_group(flag: String, effect_name: String) -> void:
+func add_effect_to_group(label: String, effect_name: String) -> void:
 	for g in custom_groups:
-		if g["flag"] == flag:
+		if g["label"] == label:
 			var effs: PackedStringArray = g.get("effects", PackedStringArray())
 			if not effs.has(effect_name):
 				effs.append(effect_name)
@@ -442,9 +434,9 @@ func add_effect_to_group(flag: String, effect_name: String) -> void:
 			return
 
 
-func remove_effect_from_group(flag: String, effect_name: String) -> void:
+func remove_effect_from_group(label: String, effect_name: String) -> void:
 	for g in custom_groups:
-		if g["flag"] == flag:
+		if g["label"] == label:
 			var effs: PackedStringArray = g.get("effects", PackedStringArray())
 			for i in range(effs.size()):
 				if effs[i] == effect_name:
@@ -538,7 +530,7 @@ func to_dict() -> Dictionary:
 		var ge := []
 		for e in g.get("effects", PackedStringArray()):
 			ge.append(e)
-		groups_arr.append({"flag": g["flag"], "label": g["label"], "effects": ge})
+		groups_arr.append({"label": g["label"], "effects": ge})
 
 	var sec_arr := []
 	for s in custom_secondary_unlocks:
@@ -565,17 +557,22 @@ func from_dict(data: Dictionary) -> void:
 			custom_effects.append(str(e))
 	# else: keep current defaults
 
+	var legacy_group_map: Dictionary = {}
 	if data.has("groups") and data["groups"] is Array and data["groups"].size() > 0:
 		custom_groups = []
 		for g in data["groups"]:
 			var effs := PackedStringArray()
 			for e in g.get("effects", []):
 				effs.append(str(e))
+			var lbl := str(g.get("label", ""))
 			custom_groups.append({
-				"flag": str(g.get("flag", "")),
-				"label": str(g.get("label", "")),
+				"label": lbl,
 				"effects": effs,
 			})
+			# Build migration map for legacy configs that stored short IDs instead of labels
+			var legacy_id := str(g.get("flag", ""))
+			if legacy_id != "" and legacy_id != lbl:
+				legacy_group_map[legacy_id] = lbl
 
 	if data.has("secondary_unlocks") and data["secondary_unlocks"] is Array and data["secondary_unlocks"].size() > 0:
 		custom_secondary_unlocks = PackedStringArray()
@@ -588,6 +585,9 @@ func from_dict(data: Dictionary) -> void:
 			var pa = n.get("position", [0, 0])
 			# Backward compat: old files may have "unlocks_letter" instead of "secondary_unlock"
 			var sec: String = str(n.get("secondary_unlock", n.get("unlocks_letter", "")))
+			var grp := str(n.get("group", ""))
+			if legacy_group_map.has(grp):
+				grp = legacy_group_map[grp]
 			nodes[id] = {
 				"name":                str(n.get("name", "")),
 				"cost":                int(n.get("cost", 0)),
@@ -603,7 +603,7 @@ func from_dict(data: Dictionary) -> void:
 				"unlocks_on_purchase": int(n.get("unlocks_on_purchase", 0)),
 				"unlocks_on_max":      int(n.get("unlocks_on_max", 0)),
 				"has_rank_up_child":   false,
-				"group":               str(n.get("group", "")),
+				"group":               grp,
 				"purchased":           int(n.get("purchased", 0)),
 				"secondary_unlock":    sec,
 			}

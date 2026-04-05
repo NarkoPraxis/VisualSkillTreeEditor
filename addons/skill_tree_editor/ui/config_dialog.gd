@@ -1,7 +1,7 @@
 ## Tabbed dialog for configuring effects and groups.
 ##
 ## Effects tab: flat list with rapid keyboard add/rename/remove.
-## Groups tab: tree with flag/label columns + effect assignment sub-panel.
+## Groups tab: list with label column + effect assignment sub-panel.
 ## Every keyboard shortcut has an on-screen button equivalent.
 @tool
 extends AcceptDialog
@@ -26,9 +26,9 @@ var _sec_remove_btn: Button
 
 # ── Groups tab refs ─────────────────────────────────────────────────────
 var _grp_tree: Tree
-var _grp_flag_field: LineEdit
 var _grp_label_field: LineEdit
 var _grp_add_btn: Button
+var _grp_rename_btn: Button
 var _grp_remove_btn: Button
 
 var _grp_effects_panel: VBoxContainer
@@ -47,6 +47,7 @@ func _ready() -> void:
 	title = "Configure Effects & Groups"
 	min_size = Vector2i(560, 520)
 	_build_ui()
+	get_ok_button().hide()
 	about_to_popup.connect(_on_about_to_popup)
 
 
@@ -55,7 +56,6 @@ func _build_ui() -> void:
 	root.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	root.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
-	# Tab bar
 	_tabs = TabBar.new()
 	_tabs.add_tab("Effects")
 	_tabs.add_tab("Groups")
@@ -63,7 +63,6 @@ func _build_ui() -> void:
 	_tabs.tab_changed.connect(_on_tab_changed)
 	root.add_child(_tabs)
 
-	# Pages
 	var eff_page := _build_effects_page()
 	root.add_child(eff_page)
 	_pages.append(eff_page)
@@ -89,7 +88,7 @@ func _on_tab_changed(idx: int) -> void:
 		_eff_field.call_deferred("grab_focus")
 	elif idx == 1:
 		_refresh_groups()
-		_grp_flag_field.call_deferred("grab_focus")
+		_grp_label_field.call_deferred("grab_focus")
 	elif idx == 2:
 		_refresh_secondary()
 		_sec_field.call_deferred("grab_focus")
@@ -105,6 +104,106 @@ func _on_about_to_popup() -> void:
 	_tabs.current_tab = _start_tab
 	_on_tab_changed(_start_tab)
 	_start_tab = 0
+
+
+# ── Button style helpers ─────────────────────────────────────────────────
+
+func _make_stylebox(color: Color, pad: int = 4) -> StyleBoxFlat:
+	var s := StyleBoxFlat.new()
+	s.bg_color = color
+	s.corner_radius_top_left = 3
+	s.corner_radius_top_right = 3
+	s.corner_radius_bottom_left = 3
+	s.corner_radius_bottom_right = 3
+	s.content_margin_left = pad
+	s.content_margin_right = pad
+	s.content_margin_top = pad
+	s.content_margin_bottom = pad
+	return s
+
+
+func _make_plus_icon() -> ImageTexture:
+	var sz := 34 / 2
+	var img := Image.create(sz, sz, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var cx := sz / 2
+	# Draw antialiased-ish thick cross: 3px arms
+	for i in range(1, sz - 1):
+		img.set_pixel(i, cx - 1, Color.WHITE)
+		img.set_pixel(i, cx,     Color.WHITE)
+		img.set_pixel(i, cx + 1, Color.WHITE)
+		img.set_pixel(cx - 1, i, Color.WHITE)
+		img.set_pixel(cx,     i, Color.WHITE)
+		img.set_pixel(cx + 1, i, Color.WHITE)
+	return ImageTexture.create_from_image(img)
+
+
+func _style_add_btn(btn: Button) -> void:
+	btn.add_theme_stylebox_override("normal",   _make_stylebox(Color(0.18, 0.50, 0.18), 8))
+	btn.add_theme_stylebox_override("hover",    _make_stylebox(Color(0.24, 0.62, 0.24), 8))
+	btn.add_theme_stylebox_override("pressed",  _make_stylebox(Color(0.12, 0.36, 0.12), 8))
+	btn.add_theme_stylebox_override("disabled", _make_stylebox(Color(0.12, 0.28, 0.12), 8))
+	btn.add_theme_color_override("font_color",          Color.WHITE)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
+
+
+func _setup_plus_btn(btn: Button) -> void:
+	btn.text = ""
+	btn.icon = _make_plus_icon()
+	btn.expand_icon = false
+	btn.custom_minimum_size = Vector2(34,34)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	btn.add_theme_stylebox_override("normal",   _make_stylebox(Color(0.18, 0.50, 0.18), 0))
+	btn.add_theme_stylebox_override("hover",    _make_stylebox(Color(0.24, 0.62, 0.24), 0))
+	btn.add_theme_stylebox_override("pressed",  _make_stylebox(Color(0.12, 0.36, 0.12), 0))
+	btn.add_theme_stylebox_override("disabled", _make_stylebox(Color(0.12, 0.28, 0.12), 0))
+	btn.add_theme_color_override("font_color",          Color.WHITE)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
+
+
+func _make_x_icon() -> ImageTexture:
+	var sz := 34 / 2
+	var img := Image.create(sz, sz, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	# Draw two diagonal lines, 3px thick
+	for i in range(1, sz - 1):
+		var o := i - sz / 2
+		for t in [-1, 0, 1]:
+			var px := i
+			var py = sz / 2 + o + t
+			if px >= 0 and px < sz and py >= 0 and py < sz:
+				img.set_pixel(px, py, Color.WHITE)
+			px = i
+			py = sz / 2 - o + t
+			if px >= 0 and px < sz and py >= 0 and py < sz:
+				img.set_pixel(px, py, Color.WHITE)
+	return ImageTexture.create_from_image(img)
+
+
+func _spacer_v(height: int = 4) -> Control:
+	var c := Control.new()
+	c.custom_minimum_size = Vector2(0, height)
+	return c
+
+
+func _setup_remove_btn(btn: Button) -> void:
+	btn.text = ""
+	btn.icon = _make_x_icon()
+	btn.expand_icon = false
+	btn.custom_minimum_size = Vector2(34, 34)
+	btn.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	btn.add_theme_stylebox_override("normal",   _make_stylebox(Color(0.55, 0.10, 0.10), 0))
+	btn.add_theme_stylebox_override("hover",    _make_stylebox(Color(0.70, 0.15, 0.15), 0))
+	btn.add_theme_stylebox_override("pressed",  _make_stylebox(Color(0.40, 0.08, 0.08), 0))
+	btn.add_theme_stylebox_override("disabled", _make_stylebox(Color(0.30, 0.08, 0.08), 0))
+	btn.add_theme_color_override("font_color",          Color.WHITE)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -126,36 +225,34 @@ func _build_effects_page() -> VBoxContainer:
 	_eff_list.item_selected.connect(_on_eff_item_selected)
 	_eff_list.gui_input.connect(_on_eff_list_input)
 	vbox.add_child(_eff_list)
+	vbox.add_child(_spacer_v(4))
 
 	var add_row := HBoxContainer.new()
 	add_row.add_theme_constant_override("separation", 4)
+	_eff_add_btn = Button.new()
+	_eff_add_btn.tooltip_text = "Add new effect (Enter)"
+	_eff_add_btn.pressed.connect(func(): _do_eff_add(_eff_field.text))
+	_setup_plus_btn(_eff_add_btn)
+	add_row.add_child(_eff_add_btn)
 	_eff_field = LineEdit.new()
 	_eff_field.placeholder_text = "Type effect name, press Enter"
 	_eff_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_eff_field.text_submitted.connect(_on_eff_add_submitted)
 	_eff_field.gui_input.connect(_on_eff_field_input)
 	add_row.add_child(_eff_field)
-	_eff_add_btn = Button.new()
-	_eff_add_btn.text = "Add"
-	_eff_add_btn.pressed.connect(func(): _do_eff_add(_eff_field.text))
-	add_row.add_child(_eff_add_btn)
-	vbox.add_child(add_row)
-
-	var action_row := HBoxContainer.new()
-	action_row.add_theme_constant_override("separation", 4)
 	_eff_rename_btn = Button.new()
-	_eff_rename_btn.text = "Rename (F2)"
-	_eff_rename_btn.tooltip_text = "Rename selected effect to the text in the field above"
+	_eff_rename_btn.text = "Replace"
+	_eff_rename_btn.tooltip_text = "Replace selected effect with the text in the field (F2)"
 	_eff_rename_btn.pressed.connect(_do_eff_rename)
 	_eff_rename_btn.disabled = true
-	action_row.add_child(_eff_rename_btn)
+	add_row.add_child(_eff_rename_btn)
 	_eff_remove_btn = Button.new()
-	_eff_remove_btn.text = "Remove (Del)"
-	_eff_remove_btn.tooltip_text = "Remove selected effect (nodes using it reset to NONE)"
+
+	_eff_remove_btn.tooltip_text = "Remove selected effect (Del)"
 	_eff_remove_btn.pressed.connect(_do_eff_remove)
 	_eff_remove_btn.disabled = true
-	action_row.add_child(_eff_remove_btn)
-	vbox.add_child(action_row)
+	_setup_remove_btn(_eff_remove_btn)
+	add_row.add_child(_eff_remove_btn)
+	vbox.add_child(add_row)
 
 	return vbox
 
@@ -185,10 +282,6 @@ func _on_eff_item_selected(_index: int) -> void:
 
 func _sanitize(text: String) -> String:
 	return text.strip_edges().to_upper().replace(" ", "_")
-
-
-func _on_eff_add_submitted(text: String) -> void:
-	_do_eff_add(text)
 
 
 func _do_eff_add(text: String) -> void:
@@ -254,7 +347,10 @@ func _on_eff_list_input(event: InputEvent) -> void:
 
 func _on_eff_field_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_F2:
+		if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+			_do_eff_add(_eff_field.text)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
 			_do_eff_rename()
 			get_viewport().set_input_as_handled()
 		elif _eff_field.text.strip_edges() == "":
@@ -296,51 +392,44 @@ func _build_groups_page() -> VBoxContainer:
 	top.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	top.add_theme_constant_override("separation", 4)
 
-	var top_label := Label.new()
-	top_label.text = "Groups"
-	top_label.add_theme_font_size_override("font_size", 13)
-	top.add_child(top_label)
-
 	_grp_tree = Tree.new()
 	_grp_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_grp_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_grp_tree.custom_minimum_size = Vector2(0, 120)
-	_grp_tree.columns = 2
-	_grp_tree.set_column_title(0, "Flag")
-	_grp_tree.set_column_title(1, "Label")
-	_grp_tree.column_titles_visible = true
-	_grp_tree.set_column_expand(0, false)
-	_grp_tree.set_column_custom_minimum_width(0, 70)
-	_grp_tree.set_column_expand(1, true)
+	_grp_tree.columns = 1
+	_grp_tree.column_titles_visible = false
+	_grp_tree.set_column_expand(0, true)
 	_grp_tree.hide_root = true
 	_grp_tree.item_selected.connect(_on_grp_selected)
-	_grp_tree.item_edited.connect(_on_grp_tree_edited)
 	_grp_tree.gui_input.connect(_on_grp_tree_input)
 	top.add_child(_grp_tree)
+	top.add_child(_spacer_v(4))
 
 	var add_row := HBoxContainer.new()
 	add_row.add_theme_constant_override("separation", 4)
-	_grp_flag_field = LineEdit.new()
-	_grp_flag_field.placeholder_text = "-x"
-	_grp_flag_field.custom_minimum_size = Vector2(60, 0)
-	_grp_flag_field.max_length = 4
-	_grp_flag_field.tooltip_text = "Short flag prefix (e.g. -e, -c)"
-	add_row.add_child(_grp_flag_field)
+	_grp_add_btn = Button.new()
+	_grp_add_btn.tooltip_text = "Add new group (Enter)"
+	_grp_add_btn.pressed.connect(_do_grp_add)
+	_setup_plus_btn(_grp_add_btn)
+	add_row.add_child(_grp_add_btn)
 	_grp_label_field = LineEdit.new()
 	_grp_label_field.placeholder_text = "GROUP_NAME"
 	_grp_label_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_grp_label_field.tooltip_text = "Group display name"
-	_grp_label_field.text_submitted.connect(func(_t): _do_grp_add())
+	_grp_label_field.tooltip_text = "Group name"
+	_grp_label_field.gui_input.connect(_on_grp_field_input)
 	add_row.add_child(_grp_label_field)
-	_grp_add_btn = Button.new()
-	_grp_add_btn.text = "Add"
-	_grp_add_btn.pressed.connect(_do_grp_add)
-	add_row.add_child(_grp_add_btn)
+	_grp_rename_btn = Button.new()
+	_grp_rename_btn.text = "Replace"
+	_grp_rename_btn.tooltip_text = "Replace selected group name with the text in the field (F2)"
+	_grp_rename_btn.pressed.connect(_do_grp_rename)
+	_grp_rename_btn.disabled = true
+	add_row.add_child(_grp_rename_btn)
 	_grp_remove_btn = Button.new()
-	_grp_remove_btn.text = "Remove (Del)"
-	_grp_remove_btn.tooltip_text = "Remove selected group"
+
+	_grp_remove_btn.tooltip_text = "Remove selected group (Del)"
 	_grp_remove_btn.pressed.connect(_do_grp_remove)
 	_grp_remove_btn.disabled = true
+	_setup_remove_btn(_grp_remove_btn)
 	add_row.add_child(_grp_remove_btn)
 	top.add_child(add_row)
 	split.add_child(top)
@@ -363,23 +452,26 @@ func _build_groups_page() -> VBoxContainer:
 	_grp_effects_list.item_selected.connect(func(_i): _grp_unassign_btn.disabled = false)
 	_grp_effects_list.gui_input.connect(_on_grp_effects_list_input)
 	_grp_effects_panel.add_child(_grp_effects_list)
+	_grp_effects_panel.add_child(_spacer_v(4))
 
 	var eff_row := HBoxContainer.new()
 	eff_row.add_theme_constant_override("separation", 4)
-	_grp_effects_opt = OptionButton.new()
-	_grp_effects_opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_grp_effects_opt.tooltip_text = "Select an effect to assign"
-	eff_row.add_child(_grp_effects_opt)
 	_grp_assign_btn = Button.new()
 	_grp_assign_btn.text = "Assign"
 	_grp_assign_btn.tooltip_text = "Add selected effect to this group"
 	_grp_assign_btn.pressed.connect(_do_grp_assign)
+	_style_add_btn(_grp_assign_btn)
 	eff_row.add_child(_grp_assign_btn)
+	_grp_effects_opt = OptionButton.new()
+	_grp_effects_opt.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_grp_effects_opt.tooltip_text = "Select an effect to assign"
+	eff_row.add_child(_grp_effects_opt)
 	_grp_unassign_btn = Button.new()
-	_grp_unassign_btn.text = "Unassign (Del)"
-	_grp_unassign_btn.tooltip_text = "Remove selected effect from this group"
+
+	_grp_unassign_btn.tooltip_text = "Remove selected effect from this group (Del)"
 	_grp_unassign_btn.pressed.connect(_do_grp_unassign)
 	_grp_unassign_btn.disabled = true
+	_setup_remove_btn(_grp_unassign_btn)
 	eff_row.add_child(_grp_unassign_btn)
 	_grp_effects_panel.add_child(eff_row)
 
@@ -389,35 +481,34 @@ func _build_groups_page() -> VBoxContainer:
 
 
 func _refresh_groups() -> void:
-	var prev_flag := _get_grp_selected_flag()
+	var prev_label := _get_grp_selected_label()
 	_grp_tree.clear()
 	var root := _grp_tree.create_item()
 	for g in _ctx.custom_groups:
 		var item := _grp_tree.create_item(root)
-		item.set_text(0, g["flag"])
-		item.set_text(1, g["label"])
-		item.set_editable(0, true)
-		item.set_editable(1, true)
-		item.set_metadata(0, g["flag"])
-	if prev_flag != "":
-		_select_grp_by_flag(prev_flag)
-	_grp_remove_btn.disabled = (_grp_tree.get_selected() == null)
+		item.set_text(0, g["label"])
+		item.set_metadata(0, g["label"])
+	if prev_label != "":
+		_select_grp_by_label(prev_label)
+	var has_sel := _grp_tree.get_selected() != null
+	_grp_rename_btn.disabled = not has_sel
+	_grp_remove_btn.disabled = not has_sel
 
 
-func _get_grp_selected_flag() -> String:
+func _get_grp_selected_label() -> String:
 	var sel := _grp_tree.get_selected()
 	if sel:
 		return sel.get_metadata(0)
 	return ""
 
 
-func _select_grp_by_flag(flag: String) -> void:
+func _select_grp_by_label(label: String) -> void:
 	var root := _grp_tree.get_root()
 	if not root:
 		return
 	var child := root.get_first_child()
 	while child:
-		if child.get_metadata(0) == flag:
+		if child.get_metadata(0) == label:
 			child.select(0)
 			_on_grp_selected()
 			return
@@ -425,30 +516,28 @@ func _select_grp_by_flag(flag: String) -> void:
 
 
 func _on_grp_selected() -> void:
+	_grp_rename_btn.disabled = false
 	_grp_remove_btn.disabled = false
-	var flag := _get_grp_selected_flag()
-	if flag == "":
+	var label := _get_grp_selected_label()
+	if label == "":
 		_grp_effects_panel.visible = false
 		return
 	_grp_effects_panel.visible = true
-	for g in _ctx.custom_groups:
-		if g["flag"] == flag:
-			_grp_effects_title.text = "Effects in %s" % g["label"]
-			break
-	_refresh_grp_effects(flag)
+	_grp_effects_title.text = "Effects in %s" % label
+	_refresh_grp_effects(label)
 
 
-func _refresh_grp_effects(flag: String) -> void:
+func _refresh_grp_effects(label: String) -> void:
 	_grp_effects_list.clear()
 	for g in _ctx.custom_groups:
-		if g["flag"] == flag:
+		if g["label"] == label:
 			for ename in g.get("effects", PackedStringArray()):
 				_grp_effects_list.add_item(ename)
 			break
 	_grp_effects_opt.clear()
 	var assigned := PackedStringArray()
 	for g in _ctx.custom_groups:
-		if g["flag"] == flag:
+		if g["label"] == label:
 			assigned = g.get("effects", PackedStringArray())
 			break
 	for ename in _ctx.custom_effects:
@@ -457,72 +546,70 @@ func _refresh_grp_effects(flag: String) -> void:
 	_grp_unassign_btn.disabled = true
 
 
-func _on_grp_tree_edited() -> void:
-	var item := _grp_tree.get_edited()
-	if not item:
-		return
-	var col := _grp_tree.get_edited_column()
-	var old_flag: String = item.get_metadata(0)
-	if col == 0:
-		var new_flag := item.get_text(0).strip_edges()
-		if not new_flag.begins_with("-") and new_flag != "":
-			new_flag = "-" + new_flag
-		if new_flag != old_flag and new_flag != "":
-			_ctx.update_group_flag(old_flag, new_flag)
-			item.set_metadata(0, new_flag)
-		else:
-			item.set_text(0, old_flag)
-	elif col == 1:
-		var new_label := item.get_text(1).strip_edges().to_upper().replace(" ", "_")
-		_ctx.update_group(_get_grp_selected_flag(), new_label)
-		item.set_text(1, new_label)
-		if _grp_effects_panel.visible:
-			_grp_effects_title.text = "Effects in %s" % new_label
-
-
 func _do_grp_add() -> void:
-	var flag := _grp_flag_field.text.strip_edges()
-	var label := _grp_label_field.text.strip_edges().to_upper().replace(" ", "_")
-	if flag == "" or label == "":
+	var label := _sanitize(_grp_label_field.text)
+	if label == "":
 		return
-	if not flag.begins_with("-"):
-		flag = "-" + flag
-	_ctx.add_group(flag, label)
-	_grp_flag_field.clear()
+	_ctx.add_group(label)
 	_grp_label_field.clear()
 	_refresh_groups()
-	_select_grp_by_flag(flag)
-	_grp_flag_field.grab_focus()
+	_select_grp_by_label(label)
+	_grp_label_field.grab_focus()
+
+
+func _do_grp_rename() -> void:
+	var sel := _grp_tree.get_selected()
+	if not sel:
+		return
+	var old_label: String = sel.get_metadata(0)
+	var new_label := _sanitize(_grp_label_field.text)
+	if new_label == "" or new_label == old_label:
+		return
+	_ctx.rename_group(old_label, new_label)
+	_grp_label_field.clear()
+	_refresh_groups()
+	_select_grp_by_label(new_label)
+	_grp_label_field.grab_focus()
 
 
 func _do_grp_remove() -> void:
-	var flag := _get_grp_selected_flag()
-	if flag == "":
+	var label := _get_grp_selected_label()
+	if label == "":
 		return
-	_ctx.remove_group(flag)
+	_ctx.remove_group(label)
 	_grp_effects_panel.visible = false
 	_refresh_groups()
 
 
 func _do_grp_assign() -> void:
-	var flag := _get_grp_selected_flag()
-	if flag == "" or _grp_effects_opt.item_count == 0:
+	var label := _get_grp_selected_label()
+	if label == "" or _grp_effects_opt.item_count == 0:
 		return
 	var ename: String = _grp_effects_opt.get_item_text(_grp_effects_opt.selected)
-	_ctx.add_effect_to_group(flag, ename)
-	_refresh_grp_effects(flag)
+	_ctx.add_effect_to_group(label, ename)
+	_refresh_grp_effects(label)
 
 
 func _do_grp_unassign() -> void:
-	var flag := _get_grp_selected_flag()
-	if flag == "":
+	var label := _get_grp_selected_label()
+	if label == "":
 		return
 	var sel := _grp_effects_list.get_selected_items()
 	if sel.size() == 0:
 		return
 	var ename: String = _grp_effects_list.get_item_text(sel[0])
-	_ctx.remove_effect_from_group(flag, ename)
-	_refresh_grp_effects(flag)
+	_ctx.remove_effect_from_group(label, ename)
+	_refresh_grp_effects(label)
+
+
+func _on_grp_field_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+			_do_grp_add()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			_do_grp_rename()
+			get_viewport().set_input_as_handled()
 
 
 func _on_grp_tree_input(event: InputEvent) -> void:
@@ -533,7 +620,9 @@ func _on_grp_tree_input(event: InputEvent) -> void:
 		elif event.keycode == KEY_F2:
 			var sel := _grp_tree.get_selected()
 			if sel:
-				_grp_tree.edit_selected(true)
+				_grp_label_field.text = sel.get_metadata(0)
+				_grp_label_field.grab_focus()
+				_grp_label_field.select_all()
 			get_viewport().set_input_as_handled()
 
 
@@ -563,36 +652,34 @@ func _build_secondary_page() -> VBoxContainer:
 	_sec_list.item_selected.connect(_on_sec_item_selected)
 	_sec_list.gui_input.connect(_on_sec_list_input)
 	vbox.add_child(_sec_list)
+	vbox.add_child(_spacer_v(4))
 
 	var add_row := HBoxContainer.new()
 	add_row.add_theme_constant_override("separation", 4)
+	_sec_add_btn = Button.new()
+	_sec_add_btn.tooltip_text = "Add new unlock (Enter)"
+	_sec_add_btn.pressed.connect(func(): _do_sec_add(_sec_field.text))
+	_setup_plus_btn(_sec_add_btn)
+	add_row.add_child(_sec_add_btn)
 	_sec_field = LineEdit.new()
 	_sec_field.placeholder_text = "Type unlock name, press Enter"
 	_sec_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_sec_field.text_submitted.connect(_on_sec_add_submitted)
 	_sec_field.gui_input.connect(_on_sec_field_input)
 	add_row.add_child(_sec_field)
-	_sec_add_btn = Button.new()
-	_sec_add_btn.text = "Add"
-	_sec_add_btn.pressed.connect(func(): _do_sec_add(_sec_field.text))
-	add_row.add_child(_sec_add_btn)
-	vbox.add_child(add_row)
-
-	var action_row := HBoxContainer.new()
-	action_row.add_theme_constant_override("separation", 4)
 	_sec_rename_btn = Button.new()
-	_sec_rename_btn.text = "Rename (F2)"
-	_sec_rename_btn.tooltip_text = "Rename selected unlock to the text in the field above"
+	_sec_rename_btn.text = "Replace"
+	_sec_rename_btn.tooltip_text = "Replace selected unlock with the text in the field (F2)"
 	_sec_rename_btn.pressed.connect(_do_sec_rename)
 	_sec_rename_btn.disabled = true
-	action_row.add_child(_sec_rename_btn)
+	add_row.add_child(_sec_rename_btn)
 	_sec_remove_btn = Button.new()
-	_sec_remove_btn.text = "Remove (Del)"
-	_sec_remove_btn.tooltip_text = "Remove selected unlock (nodes using it reset to NONE)"
+
+	_sec_remove_btn.tooltip_text = "Remove selected unlock (Del)"
 	_sec_remove_btn.pressed.connect(_do_sec_remove)
 	_sec_remove_btn.disabled = true
-	action_row.add_child(_sec_remove_btn)
-	vbox.add_child(action_row)
+	_setup_remove_btn(_sec_remove_btn)
+	add_row.add_child(_sec_remove_btn)
+	vbox.add_child(add_row)
 
 	return vbox
 
@@ -618,10 +705,6 @@ func _update_sec_buttons(has_sel: bool) -> void:
 
 func _on_sec_item_selected(_index: int) -> void:
 	_update_sec_buttons(true)
-
-
-func _on_sec_add_submitted(text: String) -> void:
-	_do_sec_add(text)
 
 
 func _do_sec_add(text: String) -> void:
@@ -687,7 +770,10 @@ func _on_sec_list_input(event: InputEvent) -> void:
 
 func _on_sec_field_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_F2:
+		if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+			_do_sec_add(_sec_field.text)
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
 			_do_sec_rename()
 			get_viewport().set_input_as_handled()
 		elif _sec_field.text.strip_edges() == "":
