@@ -637,7 +637,7 @@ func _paint_arrows(ci: CanvasItem) -> void:
 			col = Color(0.50, 1.00, 0.60) if is_sel else Color(0.30, 0.90, 0.40)
 		else:
 			col = Color(1.00, 0.95, 0.50) if is_sel else Color(1.00, 0.80, 0.15)
-		var w: float = 5.0 if is_sel else 4.0
+		var w: float = (5.0 if is_sel else 4.0) * _cam_zoom
 		_draw_bezier(ci, a, b, col, w, c1, c2)
 
 	# Temp connection preview
@@ -656,7 +656,7 @@ func _paint_arrows(ci: CanvasItem) -> void:
 		else:
 			var is_p: bool = _ctx.current_arrow_type == _ctx.ArrowType.PURCHASED
 			col = Color(0.30, 0.90, 0.40, 0.65) if is_p else Color(1.00, 0.80, 0.15, 0.65)
-		_draw_bezier(ci, a, end_s, col, 3.5, c1, c2)
+		_draw_bezier(ci, a, end_s, col, 3.5 * _cam_zoom, c1, c2)
 
 
 func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, width: float, c1: Vector2, c2: Vector2) -> void:
@@ -672,7 +672,7 @@ func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, widt
 		var tip: Vector2 = pts[pts.size() - 1]
 		var prev: Vector2 = pts[pts.size() - 2]
 		var dir: Vector2 = (tip - prev).normalized()
-		var sz := 16.0
+		var sz := width * 4.0
 		if dir.length_squared() >= 0.0001:
 			pts[pts.size() - 1] = tip - dir * sz  # stop line at arrowhead base
 		ci.draw_polyline(pts, color, width, true)
