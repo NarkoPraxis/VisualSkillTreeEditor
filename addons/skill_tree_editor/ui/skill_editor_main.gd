@@ -275,6 +275,31 @@ func _visible_world_rect() -> Rect2:
 	var br := _s2w(sz)
 	return Rect2(tl, br - tl)
 
+func _node_center(id: String) -> Vector2:
+	var pos: Vector2 = _ctx.nodes[id]["position"]
+	return Vector2(pos.x + NODE_W * 0.5, pos.y + _node_h(id) * 0.5)
+
+func _node_edge_point(id: String, other_center: Vector2) -> Vector2:
+	var center: Vector2 = _node_center(id)
+	var d: Vector2 = other_center - center
+	if d.length_squared() < 0.001:
+		return center
+	var dir: Vector2 = d.normalized()
+	var half_w: float = NODE_W * 0.5
+	var half_h: float = _node_h(id) * 0.5
+	var t: float = INF
+	if dir.x > 0.0001:
+		t = minf(t, half_w / dir.x)
+	elif dir.x < -0.0001:
+		t = minf(t, -half_w / dir.x)
+	if dir.y > 0.0001:
+		t = minf(t, half_h / dir.y)
+	elif dir.y < -0.0001:
+		t = minf(t, -half_h / dir.y)
+	if t == INF:
+		return center
+	return center + dir * t
+
 func _sync_layer_sizes() -> void:
 	var sz := _canvas_clip.size
 	_arrow_layer.position = Vector2.ZERO
@@ -309,6 +334,9 @@ func _zoom_at(sp: Vector2, delta: float) -> void:
 	_rebuild_cards()
 	_redraw_arrows()
 	_redraw_overlay()
+	# Panels finish layout after this frame; redraw again so arrows use final sizes.
+	call_deferred("_redraw_arrows")
+	call_deferred("_redraw_overlay")
 
 
 # ── Signals ──────────────────────────────────────────────────────────────
@@ -355,6 +383,7 @@ func _rebuild_cards() -> void:
 			_refresh_card(id)
 		else:
 			_create_card(id)
+			_refresh_card(id)
 
 	if _empty_lbl and _ctx.nodes.size() > 0:
 		_empty_lbl.queue_free()
@@ -597,16 +626,14 @@ func _paint_arrows(ci: CanvasItem) -> void:
 		var tid: String = conn["to"]
 		if not _ctx.nodes.has(fid) or not _ctx.nodes.has(tid):
 			continue
-		var fp: Vector2 = _ctx.nodes[fid]["position"]
-		var tp: Vector2 = _ctx.nodes[tid]["position"]
-		var fh: float = _node_h(fid)
-		# Rank-up arrows start from left-center (red dot); others from bottom-center (blue dot)
-		var a: Vector2
-		if conn["type"] == "rank_up":
-			a = _w2s(Vector2(fp.x + 2.0, fp.y + fh * 0.5))
-		else:
-			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + fh))
-		var b := _w2s(Vector2(tp.x + NODE_W * 0.5, tp.y))
+		var cf: Vector2 = _node_center(fid)
+		var ct: Vector2 = _node_center(tid)
+		var a: Vector2 = _w2s(_node_edge_point(fid, ct))
+		var b: Vector2 = _w2s(_node_edge_point(tid, cf))
+		var dir: Vector2 = (ct - cf).normalized()
+		var ctrl_len: float = maxf(cf.distance_to(ct) * _cam_zoom * 0.4, 60.0)
+		var c1: Vector2 = a + dir * ctrl_len
+		var c2: Vector2 = b - dir * ctrl_len
 
 		var conn_type: String = conn["type"]
 		var is_sel: bool = (i == _ctx.selected_connection_index)
@@ -617,30 +644,29 @@ func _paint_arrows(ci: CanvasItem) -> void:
 			col = Color(0.50, 1.00, 0.60) if is_sel else Color(0.30, 0.90, 0.40)
 		else:
 			col = Color(1.00, 0.95, 0.50) if is_sel else Color(1.00, 0.80, 0.15)
-		var w := 3.5 if is_sel else 2.5
-		_draw_bezier(ci, a, b, col, w)
+		var w: float = 5.0 if is_sel else 4.0
+		_draw_bezier(ci, a, b, col, w, c1, c2)
 
 	# Temp connection preview
 	if _conn_from != "" and _ctx.nodes.has(_conn_from):
-		var fp: Vector2 = _ctx.nodes[_conn_from]["position"]
-		var fh: float = _node_h(_conn_from)
-		var a: Vector2
+		var cf: Vector2 = _node_center(_conn_from)
+		var mouse_w: Vector2 = _conn_end
+		var a: Vector2 = _w2s(_node_edge_point(_conn_from, mouse_w))
+		var end_s: Vector2 = _w2s(mouse_w)
+		var dir: Vector2 = (mouse_w - cf).normalized()
+		var ctrl_len: float = maxf(cf.distance_to(mouse_w) * _cam_zoom * 0.4, 60.0)
+		var c1: Vector2 = a + dir * ctrl_len
+		var c2: Vector2 = end_s - dir * ctrl_len
 		var col: Color
 		if _conn_is_rankup:
-			a = _w2s(Vector2(fp.x + 2.0, fp.y + fh * 0.5))
 			col = Color(1.00, 0.25, 0.25, 0.65)
 		else:
-			a = _w2s(Vector2(fp.x + NODE_W * 0.5, fp.y + fh))
 			var is_p: bool = _ctx.current_arrow_type == _ctx.ArrowType.PURCHASED
 			col = Color(0.30, 0.90, 0.40, 0.65) if is_p else Color(1.00, 0.80, 0.15, 0.65)
-		var end_s := _w2s(_conn_end)
-		_draw_bezier(ci, a, end_s, col, 2.0)
+		_draw_bezier(ci, a, end_s, col, 3.5, c1, c2)
 
 
-func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, width: float) -> void:
-	var ctrl_dy := maxf(absf(to.y - from.y) * 0.4, 30.0)
-	var c1 := Vector2(from.x, from.y + ctrl_dy)
-	var c2 := Vector2(to.x,   to.y   - ctrl_dy)
+func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, width: float, c1: Vector2, c2: Vector2) -> void:
 	var pts := PackedVector2Array()
 	var steps := 20
 	for s in range(steps + 1):
@@ -650,19 +676,19 @@ func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, widt
 			it*it*it*from.x + 3.0*it*it*t*c1.x + 3.0*it*t*t*c2.x + t*t*t*to.x,
 			it*it*it*from.y + 3.0*it*it*t*c1.y + 3.0*it*t*t*c2.y + t*t*t*to.y))
 	if pts.size() >= 2:
+		var tip: Vector2 = pts[pts.size() - 1]
+		var prev: Vector2 = pts[pts.size() - 2]
+		var dir: Vector2 = (tip - prev).normalized()
+		var sz := 16.0
+		if dir.length_squared() >= 0.0001:
+			pts[pts.size() - 1] = tip - dir * sz  # stop line at arrowhead base
 		ci.draw_polyline(pts, color, width, true)
-	# Arrowhead
-	if pts.size() >= 2:
-		var tip := pts[pts.size() - 1]
-		var prev := pts[pts.size() - 2]
-		var dir := (tip - prev).normalized()
-		if dir.length_squared() < 0.0001:
-			return
-		var perp := Vector2(-dir.y, dir.x)
-		var sz := 8.0
-		ci.draw_colored_polygon(
-			PackedVector2Array([tip, tip - dir*sz + perp*sz*0.4, tip - dir*sz - perp*sz*0.4]),
-			color)
+		# Arrowhead
+		if dir.length_squared() >= 0.0001:
+			var perp := Vector2(-dir.y, dir.x)
+			ci.draw_colored_polygon(
+				PackedVector2Array([tip, tip - dir*sz + perp*sz*0.5, tip - dir*sz - perp*sz*0.5]),
+				color)
 
 
 func _paint_grid(ci: CanvasItem) -> void:
@@ -1069,10 +1095,10 @@ func _hit_connection(wp: Vector2) -> int:
 		var c: Dictionary = _ctx.connections[i]
 		if not _ctx.nodes.has(c["from"]) or not _ctx.nodes.has(c["to"]):
 			continue
-		var fp: Vector2 = _ctx.nodes[c["from"]]["position"]
-		var tp: Vector2 = _ctx.nodes[c["to"]]["position"]
-		var a := Vector2(fp.x + NODE_W * 0.5, fp.y + _node_h(c["from"]))
-		var b := Vector2(tp.x + NODE_W * 0.5, tp.y)
+		var cf: Vector2 = _node_center(c["from"])
+		var ct: Vector2 = _node_center(c["to"])
+		var a: Vector2 = _node_edge_point(c["from"], ct)
+		var b: Vector2 = _node_edge_point(c["to"], cf)
 		if _near_seg(wp, a, b, ARROW_HIT_DIST):
 			return i
 	return -1
