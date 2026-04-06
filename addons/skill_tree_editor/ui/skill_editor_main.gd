@@ -320,23 +320,16 @@ func _update_all_card_transforms() -> void:
 		var panel: PanelContainer = c["panel"]
 		if is_instance_valid(panel) and _ctx.nodes.has(id):
 			panel.position = _w2s(_ctx.nodes[id]["position"])
+			panel.scale = Vector2(_cam_zoom, _cam_zoom)
 
 func _zoom_at(sp: Vector2, delta: float) -> void:
 	var old := _cam_zoom
 	_cam_zoom = clampf(_cam_zoom + delta, ZOOM_MIN, ZOOM_MAX)
 	var r := _cam_zoom / old
 	_cam_off = sp - (sp - _cam_off) * r
-	# Destroy and recreate all cards so sizes and fonts are pixel-crisp at the new zoom.
-	for id in _cards:
-		if is_instance_valid(_cards[id]["panel"]):
-			_cards[id]["panel"].queue_free()
-	_cards.clear()
-	_rebuild_cards()
+	_update_all_card_transforms()
 	_redraw_arrows()
 	_redraw_overlay()
-	# Panels finish layout after this frame; redraw again so arrows use final sizes.
-	call_deferred("_redraw_arrows")
-	call_deferred("_redraw_overlay")
 
 
 # ── Signals ──────────────────────────────────────────────────────────────
@@ -392,30 +385,30 @@ func _rebuild_cards() -> void:
 
 func _create_card(id: String) -> void:
 	var d: Dictionary = _ctx.nodes[id]
-	var z := _cam_zoom
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(NODE_W * z, NODE_H * z)
+	panel.custom_minimum_size = Vector2(NODE_W, NODE_H)
 	panel.size = panel.custom_minimum_size
 	panel.mouse_filter = MOUSE_FILTER_IGNORE
 	panel.position = _w2s(d["position"])
+	panel.scale = Vector2(_cam_zoom, _cam_zoom)
 
 	var grp: String = d.get("group", "")
 	var sty := StyleBoxFlat.new()
-	sty.set_corner_radius_all(roundi(8 * z))
+	sty.set_corner_radius_all(8)
 	sty.bg_color = GRP_BG.get(grp, DEFAULT_BG)
 	sty.border_color = GRP_BORDER.get(grp, DEFAULT_BORDER)
-	sty.set_border_width_all(roundi(2 * z))
-	sty.set_content_margin_all(roundi(8 * z))
+	sty.set_border_width_all(2)
+	sty.set_content_margin_all(8)
 	panel.add_theme_stylebox_override("panel", sty)
 
 	# Main layout: HBox with optional icon column on the left
 	var main_hb := HBoxContainer.new()
 	main_hb.mouse_filter = MOUSE_FILTER_IGNORE
-	main_hb.add_theme_constant_override("separation", roundi(6 * z))
+	main_hb.add_theme_constant_override("separation", 6)
 	panel.add_child(main_hb)
 
 	# Icon column (left of name + cost) — square, scaled to fit node height
-	var icon_size: float = (NODE_H - 16.0) * z  # subtract content margins (8px each side)
+	var icon_size: float = NODE_H - 16.0  # subtract content margins (8px each side)
 	var icon_tex := TextureRect.new()
 	icon_tex.custom_minimum_size = Vector2(icon_size, icon_size)
 	icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -429,7 +422,7 @@ func _create_card(id: String) -> void:
 	emote.text = d.get("emoticon", "")
 	emote.visible = false
 	emote.mouse_filter = MOUSE_FILTER_IGNORE
-	emote.add_theme_font_size_override("font_size", roundi(44 * z))
+	emote.add_theme_font_size_override("font_size", 44)
 	emote.size_flags_vertical = SIZE_SHRINK_CENTER
 	main_hb.add_child(emote)
 
@@ -438,19 +431,19 @@ func _create_card(id: String) -> void:
 	# Right column: name + cost rows
 	var vb := VBoxContainer.new()
 	vb.mouse_filter = MOUSE_FILTER_IGNORE
-	vb.add_theme_constant_override("separation", roundi(2 * z))
+	vb.add_theme_constant_override("separation", 2)
 	vb.size_flags_horizontal = SIZE_EXPAND_FILL
 	main_hb.add_child(vb)
 
 	# Row 1: name + badge
 	var top := HBoxContainer.new()
 	top.mouse_filter = MOUSE_FILTER_IGNORE
-	top.add_theme_constant_override("separation", roundi(4 * z))
+	top.add_theme_constant_override("separation", 4)
 	vb.add_child(top)
 
 	var nlbl := Label.new()
 	nlbl.text = d["name"]
-	nlbl.add_theme_font_size_override("font_size", roundi(15 * z))
+	nlbl.add_theme_font_size_override("font_size", 15)
 	nlbl.mouse_filter = MOUSE_FILTER_IGNORE
 	nlbl.clip_text = true
 	nlbl.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -462,18 +455,18 @@ func _create_card(id: String) -> void:
 	var sec: String = d.get("secondary_unlock", "")
 	var badge_text: String = sec.left(3) if (sec != "" and sec != "NONE") else ""
 	var badge_sty := StyleBoxFlat.new()
-	badge_sty.set_corner_radius_all(roundi(3 * z))
+	badge_sty.set_corner_radius_all(3)
 	badge_sty.bg_color = Color(0, 0, 0, 0)
 	badge_sty.border_color = sty.border_color
-	badge_sty.set_border_width_all(max(1, roundi(1 * z)))
-	badge_sty.set_content_margin_all(max(1, roundi(1 * z)))
+	badge_sty.set_border_width_all(1)
+	badge_sty.set_content_margin_all(1)
 	var badge_panel := PanelContainer.new()
 	badge_panel.mouse_filter = MOUSE_FILTER_IGNORE
 	badge_panel.visible = badge_text != ""
 	badge_panel.add_theme_stylebox_override("panel", badge_sty)
 	var badge_lbl := Label.new()
 	badge_lbl.text = badge_text
-	badge_lbl.add_theme_font_size_override("font_size", roundi(16 * z))
+	badge_lbl.add_theme_font_size_override("font_size", 16)
 	badge_lbl.add_theme_color_override("font_color", sty.border_color)
 	badge_lbl.mouse_filter = MOUSE_FILTER_IGNORE
 	if _bold_font:
@@ -484,12 +477,12 @@ func _create_card(id: String) -> void:
 	# Row 2: cost + purchase spinner
 	var stats := HBoxContainer.new()
 	stats.mouse_filter = MOUSE_FILTER_IGNORE
-	stats.add_theme_constant_override("separation", roundi(6 * z))
+	stats.add_theme_constant_override("separation", 6)
 	vb.add_child(stats)
 
 	var clbl := Label.new()
 	clbl.text = _cost_text(d)
-	clbl.add_theme_font_size_override("font_size", roundi(11 * z))
+	clbl.add_theme_font_size_override("font_size", 11)
 	clbl.add_theme_color_override("font_color", Color(0.92, 0.88, 0.35))
 	clbl.mouse_filter = MOUSE_FILTER_IGNORE
 	clbl.size_flags_horizontal = SIZE_EXPAND_FILL
@@ -504,17 +497,17 @@ func _create_card(id: String) -> void:
 	spin.value = purchased
 	spin.step = 1
 	spin.suffix = "/ %d" % max_val
-	spin.custom_minimum_size = Vector2(86 * z, 0)
-	spin.add_theme_font_size_override("font_size", roundi(11 * z))
-	spin.add_theme_constant_override("buttons_width", roundi(16 * z))
-	spin.add_theme_constant_override("field_and_buttons_separator", roundi(2 * z))
+	spin.custom_minimum_size = Vector2(86, 0)
+	spin.add_theme_font_size_override("font_size", 11)
+	spin.add_theme_constant_override("buttons_width", 16)
+	spin.add_theme_constant_override("field_and_buttons_separator", 2)
 	spin.add_theme_constant_override("buttons_vertical_separation", 0)
 	spin.value_changed.connect(_on_purchase_spinbox_changed.bind(id))
 	stats.add_child(spin)
 	_canvas_clip.add_child(panel)
 	# SpinBox font/size overrides don't cascade to its internal LineEdit — set directly.
 	var le := spin.get_line_edit()
-	le.add_theme_font_size_override("font_size", roundi(11 * z))
+	le.add_theme_font_size_override("font_size", 11)
 	le.add_theme_constant_override("minimum_character_width", 1)
 	_cards[id] = {
 		"panel": panel, "style": sty,
@@ -559,19 +552,19 @@ func _refresh_card(id: String) -> void:
 	var border_col: Color
 	if id == _ctx.selected_skill_id:
 		border_col = SEL_BORDER
-		sty.set_border_width_all(roundi(3 * _cam_zoom))
+		sty.set_border_width_all(3)
 	elif _ctx.is_rank_up_child(id) and purchased >= max_val and max_val > 0:
 		border_col = RANKUP_BORDER
-		sty.set_border_width_all(roundi(3 * _cam_zoom))
+		sty.set_border_width_all(3)
 	elif purchased >= max_val and max_val > 0:
 		border_col = MAXED_BORDER
-		sty.set_border_width_all(roundi(3 * _cam_zoom))
+		sty.set_border_width_all(3)
 	elif purchased >= 1:
 		border_col = PURCHASED_BORDER
-		sty.set_border_width_all(roundi(2 * _cam_zoom))
+		sty.set_border_width_all(2)
 	else:
 		border_col = GRP_BORDER.get(grp, DEFAULT_BORDER)
-		sty.set_border_width_all(roundi(2 * _cam_zoom))
+		sty.set_border_width_all(2)
 	sty.border_color = border_col
 	if c.has("badge_sty") and is_instance_valid(c["badge_sty"]):
 		c["badge_sty"].border_color = border_col
@@ -1053,7 +1046,7 @@ func _node_h(id: String) -> float:
 	if _cards.has(id) and is_instance_valid(_cards[id]["panel"]):
 		var h: float = _cards[id]["panel"].size.y
 		if h > 1.0:
-			return h / _cam_zoom  # panel is sized in screen space; return world-space height
+			return h  # panel is at scale=1 internally; size.y is already world-space
 	return NODE_H
 
 func _hit_node(wp: Vector2) -> String:
