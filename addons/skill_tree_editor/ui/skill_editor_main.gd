@@ -766,7 +766,31 @@ func drop_data(_at_position: Vector2, data: Variant) -> void:
 
 # ── Input handling ───────────────────────────────────────────────────────
 
+func _input(ev: InputEvent) -> void:
+	## Intercept Ctrl shortcuts here (before the editor's own Ctrl+S "Save Scene"
+	## handler consumes them — _unhandled_key_input fires too late for Ctrl events).
+	if not visible:
+		return
+	if not (ev is InputEventKey and ev.pressed and not ev.echo):
+		return
+	var k := ev as InputEventKey
+	if not k.ctrl_pressed:
+		return
+	match k.keycode:
+		KEY_S:
+			if k.shift_pressed:
+				_on_save_as()
+			else:
+				_on_save()
+			get_viewport().set_input_as_handled()
+		KEY_O:
+			if not k.shift_pressed:
+				_on_open()
+				get_viewport().set_input_as_handled()
+
+
 func _unhandled_key_input(ev: InputEvent) -> void:
+	## Backtick has no editor conflict so _unhandled_key_input is fine for it.
 	if ev is InputEventKey and ev.pressed and not ev.echo:
 		if ev.keycode == KEY_QUOTELEFT:
 			_toggle_mode()

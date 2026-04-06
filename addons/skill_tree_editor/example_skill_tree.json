@@ -1,0 +1,892 @@
+{
+	"connections": [
+		{
+			"from": "node_1",
+			"to": "node_2",
+			"type": "purchased"
+		},
+		{
+			"from": "node_1",
+			"to": "node_6",
+			"type": "purchased"
+		},
+		{
+			"from": "node_1",
+			"to": "node_11",
+			"type": "purchased"
+		},
+		{
+			"from": "node_1",
+			"to": "node_17",
+			"type": "purchased"
+		},
+		{
+			"from": "node_1",
+			"to": "node_25",
+			"type": "purchased"
+		},
+		{
+			"from": "node_2",
+			"to": "node_3",
+			"type": "purchased"
+		},
+		{
+			"from": "node_2",
+			"to": "node_5",
+			"type": "purchased"
+		},
+		{
+			"from": "node_3",
+			"to": "node_4",
+			"type": "purchased"
+		},
+		{
+			"from": "node_6",
+			"to": "node_7",
+			"type": "purchased"
+		},
+		{
+			"from": "node_6",
+			"to": "node_10",
+			"type": "maxed"
+		},
+		{
+			"from": "node_7",
+			"to": "node_8",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_8",
+			"to": "node_9",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_11",
+			"to": "node_12",
+			"type": "purchased"
+		},
+		{
+			"from": "node_11",
+			"to": "node_14",
+			"type": "purchased"
+		},
+		{
+			"from": "node_12",
+			"to": "node_13",
+			"type": "purchased"
+		},
+		{
+			"from": "node_14",
+			"to": "node_15",
+			"type": "purchased"
+		},
+		{
+			"from": "node_15",
+			"to": "node_16",
+			"type": "maxed"
+		},
+		{
+			"from": "node_17",
+			"to": "node_18",
+			"type": "purchased"
+		},
+		{
+			"from": "node_17",
+			"to": "node_21",
+			"type": "purchased"
+		},
+		{
+			"from": "node_18",
+			"to": "node_19",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_19",
+			"to": "node_20",
+			"type": "rank_up"
+		},
+		{
+			"from": "node_21",
+			"to": "node_22",
+			"type": "maxed"
+		},
+		{
+			"from": "node_22",
+			"to": "node_23",
+			"type": "purchased"
+		},
+		{
+			"from": "node_23",
+			"to": "node_24",
+			"type": "purchased"
+		},
+		{
+			"from": "node_25",
+			"to": "node_26",
+			"type": "purchased"
+		},
+		{
+			"from": "node_25",
+			"to": "node_28",
+			"type": "purchased"
+		},
+		{
+			"from": "node_26",
+			"to": "node_27",
+			"type": "maxed"
+		},
+		{
+			"from": "node_28",
+			"to": "node_29",
+			"type": "purchased"
+		},
+		{
+			"from": "node_29",
+			"to": "node_30",
+			"type": "maxed"
+		}
+	],
+	"effects": [
+		"NONE",
+		"MONEY_GAIN",
+		"MONEY_MULTIPLIER",
+		"CLICK_POWER",
+		"CLICK_MULTIPLIER",
+		"AUTO_CLICK",
+		"OBJECT_SIZE",
+		"OBJECT_SPEED",
+		"CRIT_RATE",
+		"CRIT_DAMAGE",
+		"CHAIN_LIGHTNING",
+		"COMBO_BONUS",
+		"AREA_OF_EFFECT",
+		"PROJECTILE_COUNT",
+		"PROJECTILE_SPEED",
+		"PRESTIGE_BONUS",
+		"PRESTIGE_MULTIPLIER",
+		"OFFLINE_EARNINGS",
+		"IDLE_SPEED",
+		"SPAWN_RATE",
+		"SPAWN_AMOUNT",
+		"MERGE_SPEED",
+		"MERGE_VALUE",
+		"DROP_RATE",
+		"DROP_QUALITY",
+		"EXPERIENCE_GAIN",
+		"LEVEL_SPEED",
+		"COOLDOWN_REDUCTION",
+		"DURATION_BONUS",
+		"UPGRADE_DISCOUNT",
+		"UNLOCK_SPEED",
+		"CUSTOM_1",
+		"CUSTOM_2",
+		"CUSTOM_3",
+		"CUSTOM_4",
+		"CUSTOM_5"
+	],
+	"groups": [
+		{
+			"effects": [
+				"MONEY_GAIN",
+				"MONEY_MULTIPLIER",
+				"CLICK_POWER",
+				"CLICK_MULTIPLIER",
+				"PRESTIGE_BONUS",
+				"PRESTIGE_MULTIPLIER"
+			],
+			"label": "ECONOMY"
+		},
+		{
+			"effects": [
+				"CRIT_RATE",
+				"CRIT_DAMAGE",
+				"CHAIN_LIGHTNING",
+				"COMBO_BONUS",
+				"AREA_OF_EFFECT",
+				"PROJECTILE_COUNT",
+				"PROJECTILE_SPEED"
+			],
+			"label": "COMBAT"
+		},
+		{
+			"effects": [
+				"AUTO_CLICK",
+				"IDLE_SPEED",
+				"SPAWN_RATE",
+				"SPAWN_AMOUNT",
+				"MERGE_SPEED",
+				"MERGE_VALUE"
+			],
+			"label": "PRODUCTION"
+		},
+		{
+			"effects": [
+				"EXPERIENCE_GAIN",
+				"LEVEL_SPEED",
+				"UNLOCK_SPEED",
+				"UPGRADE_DISCOUNT",
+				"COOLDOWN_REDUCTION",
+				"DURATION_BONUS"
+			],
+			"label": "PROGRESSION"
+		},
+		{
+			"effects": [
+				"DROP_RATE",
+				"DROP_QUALITY",
+				"OFFLINE_EARNINGS"
+			],
+			"label": "DROP"
+		},
+		{
+			"effects": [
+				"CUSTOM_1",
+				"CUSTOM_2",
+				"CUSTOM_3",
+				"CUSTOM_4",
+				"CUSTOM_5"
+			],
+			"label": "CUSTOM"
+		}
+	],
+	"next_id": 31,
+	"nodes": {
+		"node_1": {
+			"cost": 50,
+			"cost_increase": 0,
+			"description": "Your journey begins here. Purchase this to open all four branches of the skill tree. Grants 10% more gold from all sources. Notice the emoticon icon (emoji). Secondary badge 'TUT' marks tutorial completion.",
+			"effect": "MONEY_GAIN",
+			"emoticon": "🏪",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Merchant's Start",
+			"position": [
+				158.333343505859,
+				-370.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "TUTORIAL_COMPLETE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 5,
+			"value": 0.1
+		},
+		"node_10": {
+			"cost": 3500,
+			"cost_increase": 0,
+			"description": "Doubles the power of every click (2x multiplier). Locked behind a gold (maxed) arrow from Quick Fingers — you must fully max Quick Fingers before this unlocks.",
+			"effect": "CLICK_MULTIPLIER",
+			"emoticon": "",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Gold Rush",
+			"position": [
+				-756.666687011719,
+				288.333312988281
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 2.0
+		},
+		"node_11": {
+			"cost": 200,
+			"cost_increase": 0,
+			"description": "Set things in motion automatically. Enables auto-click functionality. Gateway to the PRODUCTION branch — purchase to unlock both Speed Demon and Factory Floor. Uses a gear emoticon.",
+			"effect": "AUTO_CLICK",
+			"emoticon": "⚙️",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 1,
+			"name": "Idle Hands",
+			"position": [
+				407.499938964844,
+				302.5
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 2,
+			"value": 1.0
+		},
+		"node_12": {
+			"cost": 400,
+			"cost_increase": 200,
+			"description": "Faster idle generation. Adds 10% idle speed per rank. Flat cost increase of 200 per rank (ranks cost 400, 600, 800, 1000, 1200). Unlocks Rapid Idle when purchased at any rank.",
+			"effect": "IDLE_SPEED",
+			"emoticon": "",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 5,
+			"name": "Speed Demon",
+			"position": [
+				696.666625976563,
+				471.666687011719
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 0.1
+		},
+		"node_13": {
+			"cost": 2500,
+			"cost_increase": 0,
+			"description": "Idle systems reach peak efficiency — +50% idle speed in a single skill. Requires Speed Demon purchased at any rank (green arrow). Uses a rocket emoticon for flair.",
+			"effect": "IDLE_SPEED",
+			"emoticon": "🚀",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 1,
+			"name": "Rapid Idle",
+			"position": [
+				905.000061035156,
+				650.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.5
+		},
+		"node_14": {
+			"cost": 600,
+			"cost_increase": 0,
+			"description": "Build a factory to spawn resources 25% faster. Uses an SVG icon from the plugin's own asset folder to demonstrate image path support (res:// path in emoticon field).",
+			"effect": "SPAWN_RATE",
+			"emoticon": "res://addons/skill_tree_editor/icons/icon_create_mode.svg",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 1,
+			"name": "Factory Floor",
+			"position": [
+				590.0,
+				787.5
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 0.25
+		},
+		"node_15": {
+			"cost": 1000,
+			"cost_increase": 500,
+			"description": "Each rank adds one extra resource per spawn cycle. Cost increase of 500 per rank. Max all 3 ranks to unlock Merge Master via a gold (maxed) arrow.",
+			"effect": "SPAWN_AMOUNT",
+			"emoticon": "",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 3,
+			"name": "Assembly Line",
+			"position": [
+				605.833312988281,
+				964.999938964844
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 0,
+			"value": 1.0
+		},
+		"node_16": {
+			"cost": 4000,
+			"cost_increase": 0,
+			"description": "Assembly Line must be fully maxed to unlock this via gold arrow. Merged items are worth double (2x merge value). Grants the PRODUCTION_EXPERT secondary unlock badge.",
+			"effect": "MERGE_VALUE",
+			"emoticon": "🔮",
+			"exponential": false,
+			"group": "PRODUCTION",
+			"image": "",
+			"max": 1,
+			"name": "Merge Master",
+			"position": [
+				606.666625976563,
+				1140.00012207031
+			],
+			"purchased": 0,
+			"secondary_unlock": "PRODUCTION_EXPERT",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 2.0
+		},
+		"node_17": {
+			"cost": 300,
+			"cost_increase": 0,
+			"description": "Learn the basics of combat. Adds 5% critical hit chance. Gateway to the COMBAT branch — purchase to unlock Critical Eye I and Critical Strike simultaneously.",
+			"effect": "CRIT_RATE",
+			"emoticon": "⚔️",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 1,
+			"name": "Combat Training",
+			"position": [
+				455.0,
+				-76.6666564941406
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 2,
+			"value": 0.05
+		},
+		"node_18": {
+			"cost": 500,
+			"cost_increase": 250,
+			"description": "Rank 1 of the Critical Eye rank-up chain. Adds 3% crit rate per rank. Cost increases by 250 per rank. Max all 3 ranks to rank up to Critical Eye II via blue (rank_up) arrow.",
+			"effect": "CRIT_RATE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 3,
+			"name": "Critical Eye I",
+			"position": [
+				1047.91662597656,
+				97.0833053588867
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.03
+		},
+		"node_19": {
+			"cost": 1500,
+			"cost_increase": 750,
+			"description": "Rank 2 of the Critical Eye chain. Adds 5% crit rate per rank (stronger than Rank 1). Rank-up child of Critical Eye I — inherits the CRIT_RATE effect automatically.",
+			"effect": "CRIT_RATE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 3,
+			"name": "Critical Eye II",
+			"position": [
+				1297.91674804688,
+				99.1666717529297
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.05
+		},
+		"node_2": {
+			"cost": 100,
+			"cost_increase": 50,
+			"description": "A larger purse means more coins to carry. Each rank adds 15% gold gain. Cost increases by 50 per rank (flat increase). Max 3 ranks. Unlocks Market Stall and Quick Sale.",
+			"effect": "MONEY_GAIN",
+			"emoticon": "💰",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 3,
+			"name": "Coin Purse",
+			"position": [
+				-468.333312988281,
+				274.999969482422
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 2,
+			"value": 0.15
+		},
+		"node_20": {
+			"cost": 4000,
+			"cost_increase": 2000,
+			"description": "Rank 3: The peak of critical precision. Adds 8% crit rate per rank. Final rank in this chain. Grants COMBAT_MASTERY secondary. Cost increase of 2000 makes maxing this a major commitment.",
+			"effect": "CRIT_RATE",
+			"emoticon": "👁️",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 3,
+			"name": "Critical Eye III",
+			"position": [
+				1572.08312988281,
+				92.0833282470703
+			],
+			"purchased": 0,
+			"secondary_unlock": "COMBAT_MASTERY",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.08
+		},
+		"node_21": {
+			"cost": 800,
+			"cost_increase": 400,
+			"description": "Make crits hit harder — +10% crit damage per rank. EXPONENTIAL + flat increase combined: costs scale very steeply. Max all 5 to unlock Chain Reaction via gold (maxed) arrow.",
+			"effect": "CRIT_DAMAGE",
+			"emoticon": "",
+			"exponential": true,
+			"group": "COMBAT",
+			"image": "",
+			"max": 5,
+			"name": "Critical Strike",
+			"position": [
+				752.916625976563,
+				198.333312988281
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 0,
+			"value": 0.1
+		},
+		"node_22": {
+			"cost": 5000,
+			"cost_increase": 0,
+			"description": "Critical Strike must be fully maxed to unlock this. Attacks chain to 2 additional nearby targets. Unlocks Combo Expert when purchased (green arrow). Shares the lightning emoticon.",
+			"effect": "CHAIN_LIGHTNING",
+			"emoticon": "⚡",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 1,
+			"name": "Chain Reaction",
+			"position": [
+				999.58349609375,
+				365.416625976563
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 2.0
+		},
+		"node_23": {
+			"cost": 2000,
+			"cost_increase": 0,
+			"description": "Build up combos to amplify damage — +5% combo bonus per rank. Fixed cost per rank (no increase, no exponential). Max all 5 to unlock Area Sweep via gold (maxed) arrow.",
+			"effect": "COMBO_BONUS",
+			"emoticon": "",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 5,
+			"name": "Combo Expert",
+			"position": [
+				1246.25012207031,
+				545.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 0.05
+		},
+		"node_24": {
+			"cost": 8000,
+			"cost_increase": 0,
+			"description": "Max Combo Expert to unlock via gold arrow: attacks affect a 1.5x larger area. Capstone of the Combat branch. Uses an SVG icon. Grants COMBAT_MASTERY secondary when purchased.",
+			"effect": "AREA_OF_EFFECT",
+			"emoticon": "🧹",
+			"exponential": false,
+			"group": "COMBAT",
+			"image": "",
+			"max": 1,
+			"name": "Area Sweep",
+			"position": [
+				1419.16662597656,
+				703.75
+			],
+			"purchased": 0,
+			"secondary_unlock": "COMBAT_MASTERY",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 1.5
+		},
+		"node_25": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "Begin your education and earn 10% more XP from all activities. Gateway to the PROGRESSION and DROP branches — purchase to unlock Quick Study and Loot Sense.",
+			"effect": "EXPERIENCE_GAIN",
+			"emoticon": "📚",
+			"exponential": false,
+			"group": "PROGRESSION",
+			"image": "",
+			"max": 1,
+			"name": "Student's Path",
+			"position": [
+				0.0,
+				300.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 2,
+			"value": 0.1
+		},
+		"node_26": {
+			"cost": 250,
+			"cost_increase": 125,
+			"description": "Absorb knowledge faster — +5% leveling speed per rank. Cost increases by 125 per rank. MAX this skill (gold arrow required) to unlock Bargain Hunter; just purchasing it is not enough.",
+			"effect": "LEVEL_SPEED",
+			"emoticon": "",
+			"exponential": false,
+			"group": "PROGRESSION",
+			"image": "",
+			"max": 5,
+			"name": "Quick Study",
+			"position": [
+				-200.0,
+				500.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 0,
+			"value": 0.05
+		},
+		"node_27": {
+			"cost": 2000,
+			"cost_increase": 0,
+			"description": "All upgrades cost 10% less — a strong investment that pays for itself over time. Requires Quick Study to be FULLY MAXED (gold arrow). Uses a tag emoticon and no secondary.",
+			"effect": "UPGRADE_DISCOUNT",
+			"emoticon": "🏷️",
+			"exponential": false,
+			"group": "PROGRESSION",
+			"image": "",
+			"max": 1,
+			"name": "Bargain Hunter",
+			"position": [
+				-200.0,
+				700.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.1
+		},
+		"node_28": {
+			"cost": 500,
+			"cost_increase": 0,
+			"description": "You develop a nose for treasure — +15% item drop rate. In the DROP group (different color from PROGRESSION neighbors). Unlocks Treasure Hunter when purchased.",
+			"effect": "DROP_RATE",
+			"emoticon": "💎",
+			"exponential": false,
+			"group": "DROP",
+			"image": "",
+			"max": 1,
+			"name": "Loot Sense",
+			"position": [
+				200.0,
+				500.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 0.15
+		},
+		"node_29": {
+			"cost": 1500,
+			"cost_increase": 750,
+			"description": "Seek out higher-quality loot — +10% drop quality per rank. Cost increases by 750 per rank. Max all 3 ranks to unlock Night Owl via gold (maxed) arrow.",
+			"effect": "DROP_QUALITY",
+			"emoticon": "",
+			"exponential": false,
+			"group": "DROP",
+			"image": "",
+			"max": 3,
+			"name": "Treasure Hunter",
+			"position": [
+				200.0,
+				700.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 0,
+			"value": 0.1
+		},
+		"node_3": {
+			"cost": 500,
+			"cost_increase": 0,
+			"description": "Open a market stall and multiply all earnings by 1.5x. Requires Coin Purse to be purchased (green arrow). Max this single-rank node to unlock Wholesale Deal via the gold (maxed) arrow.",
+			"effect": "MONEY_MULTIPLIER",
+			"emoticon": "",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Market Stall",
+			"position": [
+				-720.0,
+				531.666625976563
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 1,
+			"value": 1.5
+		},
+		"node_30": {
+			"cost": 6000,
+			"cost_increase": 0,
+			"description": "Earn 50% of active income even while offline. Requires Treasure Hunter fully maxed. Capstone of the DROP branch. Uses a load-game SVG icon. Grants PRESTIGE_UNLOCK secondary.",
+			"effect": "OFFLINE_EARNINGS",
+			"emoticon": "🦉",
+			"exponential": false,
+			"group": "DROP",
+			"image": "",
+			"max": 1,
+			"name": "Night Owl",
+			"position": [
+				200.0,
+				900.0
+			],
+			"purchased": 0,
+			"secondary_unlock": "PRESTIGE_UNLOCK",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.5
+		},
+		"node_4": {
+			"cost": 1200,
+			"cost_increase": 0,
+			"description": "Bulk pricing means bigger profits. Adds 20% gold multiplier per rank. EXPONENTIAL costs — each rank costs significantly more than the last even without cost_increase. Uses a project icon as its display image (res:// path in the emoticon field). Grants PRESTIGE_UNLOCK secondary.",
+			"effect": "MONEY_MULTIPLIER",
+			"emoticon": "💸",
+			"exponential": true,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 5,
+			"name": "Wholesale Deal",
+			"position": [
+				-815.0,
+				704.999938964844
+			],
+			"purchased": 0,
+			"secondary_unlock": "PRESTIGE_UNLOCK",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.2
+		},
+		"node_5": {
+			"cost": 200,
+			"cost_increase": 0,
+			"description": "Speed up transactions and add 25% more power to each manual click. No icon, no secondary — a plain single-rank utility node. Requires Coin Purse purchased.",
+			"effect": "CLICK_POWER",
+			"emoticon": "",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Quick Sale",
+			"position": [
+				-431.666687011719,
+				440.416656494141
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.25
+		},
+		"node_6": {
+			"cost": 150,
+			"cost_increase": 75,
+			"description": "Train your clicking speed. Adds 20% click power per rank. Cost increases by 75 per rank. Max this out (gold arrow) to unlock Gold Rush; purchase it (green arrow) to unlock Click Power I.",
+			"effect": "CLICK_POWER",
+			"emoticon": "👆",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 3,
+			"name": "Quick Fingers",
+			"position": [
+				-773.333374023438,
+				136.66667175293
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 1,
+			"value": 0.2
+		},
+		"node_7": {
+			"cost": 300,
+			"cost_increase": 0,
+			"description": "Rank 1 of the Click Power rank-up chain. Grants +50% click strength. Rank-up arrows (blue) connect this to Click Power II — max this node to promote it to the next rank.",
+			"effect": "CLICK_POWER",
+			"emoticon": "",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Click Power I",
+			"position": [
+				-1008.33331298828,
+				258.333343505859
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.5
+		},
+		"node_8": {
+			"cost": 800,
+			"cost_increase": 0,
+			"description": "Rank 2: Clicks hit much harder — +100% click strength. Rank-up child of Click Power I, meaning Click Power I must be maxed to unlock this. Inherits CLICK_POWER effect from its parent.",
+			"effect": "CLICK_POWER",
+			"emoticon": "",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Click Power II",
+			"position": [
+				-1228.33349609375,
+				254.999984741211
+			],
+			"purchased": 0,
+			"secondary_unlock": "NONE",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 1.0
+		},
+		"node_9": {
+			"cost": 2000,
+			"cost_increase": 0,
+			"description": "Rank 3: Maximum clicking potential — +200% click strength. Final rank in the Click Power chain. Grants COMBAT_MASTERY secondary when purchased. Uses a lightning emoticon.",
+			"effect": "CLICK_POWER",
+			"emoticon": "⚡",
+			"exponential": false,
+			"group": "ECONOMY",
+			"image": "",
+			"max": 1,
+			"name": "Click Power III",
+			"position": [
+				-1511.66662597656,
+				244.999984741211
+			],
+			"purchased": 0,
+			"secondary_unlock": "COMBAT_MASTERY",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 2.0
+		}
+	},
+	"secondary_unlocks": [
+		"NONE",
+		"TUTORIAL_COMPLETE",
+		"PRESTIGE_UNLOCK",
+		"COMBAT_MASTERY",
+		"PRODUCTION_EXPERT"
+	]
+}
