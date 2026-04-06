@@ -34,6 +34,46 @@
 			"from": "node_7",
 			"to": "node_8",
 			"type": "rank_up"
+		},
+		{
+			"from": "node_1",
+			"to": "node_9",
+			"type": "purchased"
+		},
+		{
+			"from": "node_10",
+			"to": "node_15",
+			"type": "purchased"
+		},
+		{
+			"from": "node_10",
+			"to": "node_16",
+			"type": "purchased"
+		},
+		{
+			"from": "node_10",
+			"to": "node_17",
+			"type": "maxed"
+		},
+		{
+			"from": "node_18",
+			"to": "node_19",
+			"type": "purchased"
+		},
+		{
+			"from": "node_18",
+			"to": "node_20",
+			"type": "maxed"
+		},
+		{
+			"from": "node_18",
+			"to": "node_21",
+			"type": "purchased"
+		},
+		{
+			"from": "node_14",
+			"to": "node_22",
+			"type": "purchased"
 		}
 	],
 	"effects": [
@@ -170,7 +210,7 @@
 			"label": "SET"
 		}
 	],
-	"next_id": 8,
+	"next_id": 22,
 	"nodes": {
 		"node_1": {
 			"cost": 100,
@@ -184,13 +224,223 @@
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				601.5,
-				-122.25
+				568.5,
+				-210.25
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
 			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 2,
+			"value": 0.0
+		},
+		"node_10": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				248.285980224609,
+				-580.547607421875
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 2,
+			"value": 0.0
+		},
+		"node_11": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1143.28588867188,
+				-96.2142944335938
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_12": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1375.28588867188,
+				-246.214294433594
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_13": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1362.28588867188,
+				-37.2142944335938
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_14": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1231.28588867188,
+				106.785705566406
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 1,
+			"value": 0.0
+		},
+		"node_15": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				98.6192779541016,
+				-371.547637939453
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_16": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				363.619262695313,
+				-351.547637939453
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_17": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				691.952575683594,
+				-411.547637939453
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_18": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1053.61926269531,
+				-622.547607421875
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 1,
+			"unlocks_on_purchase": 2,
+			"value": 0.0
+		},
+		"node_19": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				940.285888671875,
+				-403.214294433594
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
 			"value": 0.0
 		},
 		"node_2": {
@@ -212,6 +462,69 @@
 			"secondary_unlock": "A",
 			"unlocks_on_max": 0,
 			"unlocks_on_purchase": 1,
+			"value": 0.0
+		},
+		"node_20": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1210.28588867188,
+				-423.214294433594
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_21": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1490.28588867188,
+				-464.880950927734
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_22": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				1085.28588867188,
+				489.285583496094
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
 			"value": 0.0
 		},
 		"node_3": {
@@ -333,6 +646,27 @@
 			"position": [
 				-178.499984741211,
 				28.75
+			],
+			"purchased": 0,
+			"secondary_unlock": "",
+			"unlocks_on_max": 0,
+			"unlocks_on_purchase": 0,
+			"value": 0.0
+		},
+		"node_9": {
+			"cost": 100,
+			"cost_increase": 0,
+			"description": "",
+			"effect": "NONE",
+			"emoticon": "",
+			"exponential": false,
+			"group": "",
+			"image": "",
+			"max": 1,
+			"name": "New Skill",
+			"position": [
+				852.285827636719,
+				-60.2142944335938
 			],
 			"purchased": 0,
 			"secondary_unlock": "",

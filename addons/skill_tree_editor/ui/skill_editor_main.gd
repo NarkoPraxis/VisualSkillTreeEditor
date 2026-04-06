@@ -74,6 +74,7 @@ var _title_lbl: Label
 var _file_dlg: EditorFileDialog
 var _file_dlg_mode: String = ""
 var _empty_lbl: Label
+var _drag_hover: bool = false
 
 ## id → { panel, style, name_lbl, cost_lbl, max_lbl, emote_lbl }
 var _cards: Dictionary = {}
@@ -315,6 +316,11 @@ func _wire() -> void:
 		_update_mode_toggle_icon()
 	)
 	_ctx.connection_rejected.connect(_shake_card)
+	_canvas_clip.set_drag_forwarding(Callable(), can_drop_data, drop_data)
+	_canvas_clip.mouse_exited.connect(func():
+		if _drag_hover:
+			_drag_hover = false
+			_redraw_overlay())
 
 
 func _on_data() -> void:
@@ -703,6 +709,11 @@ func _paint_overlay(ci: CanvasItem) -> void:
 			ci.draw_line(bc + Vector2(-xs, -xs), bc + Vector2(xs, xs), Color.WHITE, 2.0, true)
 			ci.draw_line(bc + Vector2(xs, -xs), bc + Vector2(-xs, xs), Color.WHITE, 2.0, true)
 
+	if _drag_hover:
+		var sz: Vector2 = _canvas_clip.size
+		ci.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.8, 0.3, 0.18), true)
+		ci.draw_rect(Rect2(Vector2.ZERO, sz), Color(0.3, 0.9, 0.3, 0.9), false, 3.0)
+
 
 func _redraw_arrows() -> void:
 	if is_instance_valid(_arrow_layer):
@@ -711,6 +722,46 @@ func _redraw_arrows() -> void:
 func _redraw_overlay() -> void:
 	if is_instance_valid(_overlay_layer):
 		_overlay_layer.queue_redraw()
+
+
+# ── Drag-and-drop ────────────────────────────────────────────────────────
+
+func can_drop_data(_at_position: Vector2, data: Variant) -> bool:
+	if not (data is Dictionary and data.get("type") == "files"):
+		return false
+	for f in data.get("files", []):
+		if (f as String).ends_with(".json"):
+			_drag_hover = true
+			_redraw_overlay()
+			return true
+	return false
+
+
+func drop_data(_at_position: Vector2, data: Variant) -> void:
+	_drag_hover = false
+	_redraw_overlay()
+	var path: String = ""
+	for f in data.get("files", []):
+		if (f as String).ends_with(".json"):
+			path = f
+			break
+	if path == "":
+		return
+	if _ctx.nodes.size() > 0:
+		var cd := ConfirmationDialog.new()
+		cd.dialog_text = "Replace current tree with:\n%s" % path
+		cd.confirmed.connect(func():
+			_ctx.load_from_file(path)
+			_update_title()
+			cd.queue_free())
+		cd.visibility_changed.connect(func():
+			if not cd.visible:
+				cd.queue_free())
+		add_child(cd)
+		cd.popup_centered()
+	else:
+		_ctx.load_from_file(path)
+		_update_title()
 
 
 # ── Input handling ───────────────────────────────────────────────────────
