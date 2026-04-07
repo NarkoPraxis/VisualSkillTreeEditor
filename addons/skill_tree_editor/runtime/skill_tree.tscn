@@ -1,0 +1,947 @@
+[gd_scene format=3 uid="uid://du88tvuk1af8q"]
+
+[ext_resource type="Script" uid="uid://1l8clwugwvgk" path="res://addons/skill_tree_editor/runtime/skill_tree.gd" id="1_stgd"]
+[ext_resource type="Script" uid="uid://bsmm8sqdx8ulh" path="res://addons/skill_tree_editor/runtime/skill_node.gd" id="2_qaik4"]
+
+[node name="SkillTree" type="Control" unique_id=1012355133]
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_stgd")
+skill_config = "res://addons/skill_tree_editor/example_skill_tree.json"
+_initial_cam_off = Vector2(538.2847, 190.34267)
+_initial_cam_zoom = 0.3137495447258552
+
+[node name="node_1" type="Control" parent="." unique_id=1439945019]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 587.96173
+offset_top = 74.25533
+offset_right = 767.96173
+offset_bottom = 156.25534
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_1"
+_node_data = {
+"cost": 50,
+"cost_increase": 0,
+"description": "Your journey begins here. Purchase this to open all four branches of the skill tree. Grants 10% more gold from all sources. Notice the emoticon icon (emoji). Secondary badge 'TUT' marks tutorial completion.",
+"effect": "MONEY_GAIN",
+"emoticon": "🏪",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Merchant's Start",
+"position": Vector2(158.33334, -370),
+"purchased": 0,
+"secondary_unlock": "TUTORIAL_COMPLETE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 5,
+"value": 0.1
+}
+metadata/skill_node_id = "node_1"
+
+[node name="node_10" type="Control" parent="." unique_id=2102920772]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 300.8809
+offset_top = 280.80713
+offset_right = 480.8809
+offset_bottom = 362.80713
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_10"
+_node_data = {
+"cost": 3500,
+"cost_increase": 0,
+"description": "Doubles the power of every click (2x multiplier). Locked behind a gold (maxed) arrow from Quick Fingers — you must fully max Quick Fingers before this unlocks.",
+"effect": "CLICK_MULTIPLIER",
+"emoticon": "",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Gold Rush",
+"position": Vector2(-756.6667, 288.3333),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 2.0
+}
+metadata/skill_node_id = "node_10"
+
+[node name="node_11" type="Control" parent="." unique_id=1149000335]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 660.0
+offset_top = 145.0
+offset_right = 840.0
+offset_bottom = 227.0
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_11"
+_node_data = {
+"cost": 200,
+"cost_increase": 0,
+"description": "Set things in motion automatically. Enables auto-click functionality. Gateway to the PRODUCTION branch — purchase to unlock both Speed Demon and Factory Floor. Uses a gear emoticon.",
+"effect": "AUTO_CLICK",
+"emoticon": "⚙️",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Idle Hands",
+"position": Vector2(407.49994, 302.5),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 2,
+"value": 1.0
+}
+metadata/skill_node_id = "node_11"
+
+[node name="node_12" type="Control" parent="." unique_id=1027604259]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 756.8636
+offset_top = 338.32788
+offset_right = 936.8636
+offset_bottom = 420.32788
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_12"
+_node_data = {
+"cost": 400,
+"cost_increase": 200,
+"description": "Faster idle generation. Adds 10% idle speed per rank. Flat cost increase of 200 per rank (ranks cost 400, 600, 800, 1000, 1200). Unlocks Rapid Idle when purchased at any rank.",
+"effect": "IDLE_SPEED",
+"emoticon": "",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 5,
+"name": "Speed Demon",
+"position": Vector2(696.6666, 471.6667),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 0.1
+}
+metadata/skill_node_id = "node_12"
+
+[node name="node_13" type="Control" parent="." unique_id=1774307830]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 822.2281
+offset_top = 394.27988
+offset_right = 1002.2281
+offset_bottom = 476.27988
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_13"
+_node_data = {
+"cost": 2500,
+"cost_increase": 0,
+"description": "Idle systems reach peak efficiency — +50% idle speed in a single skill. Requires Speed Demon purchased at any rank (green arrow). Uses a rocket emoticon for flair.",
+"effect": "IDLE_SPEED",
+"emoticon": "🚀",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Rapid Idle",
+"position": Vector2(905.00006, 650),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.5
+}
+metadata/skill_node_id = "node_13"
+
+[node name="node_14" type="Control" parent="." unique_id=157033715]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 723.397
+offset_top = 437.42044
+offset_right = 903.397
+offset_bottom = 519.4204
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_14"
+_node_data = {
+"cost": 600,
+"cost_increase": 0,
+"description": "Build a factory to spawn resources 25% faster. Uses an SVG icon from the plugin's own asset folder to demonstrate image path support (res:// path in emoticon field).",
+"effect": "SPAWN_RATE",
+"emoticon": "res://addons/skill_tree_editor/icons/icon_create_mode.svg",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Factory Floor",
+"position": Vector2(590, 787.5),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 0.25
+}
+metadata/skill_node_id = "node_14"
+
+[node name="node_15" type="Control" parent="." unique_id=1118846485]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 728.3646
+offset_top = 493.11096
+offset_right = 908.3646
+offset_bottom = 575.11096
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_15"
+_node_data = {
+"cost": 1000,
+"cost_increase": 500,
+"description": "Each rank adds one extra resource per spawn cycle. Cost increase of 500 per rank. Max all 3 ranks to unlock Merge Master via a gold (maxed) arrow.",
+"effect": "SPAWN_AMOUNT",
+"emoticon": "",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 3,
+"name": "Assembly Line",
+"position": Vector2(605.8333, 964.99994),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 1,
+"unlocks_on_purchase": 0,
+"value": 1.0
+}
+metadata/skill_node_id = "node_15"
+
+[node name="node_16" type="Control" parent="." unique_id=1627362002]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 728.6261
+offset_top = 548.0172
+offset_right = 908.6261
+offset_bottom = 630.0172
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_16"
+_node_data = {
+"cost": 4000,
+"cost_increase": 0,
+"description": "Assembly Line must be fully maxed to unlock this via gold arrow. Merged items are worth double (2x merge value). Grants the PRODUCTION_EXPERT secondary unlock badge.",
+"effect": "MERGE_VALUE",
+"emoticon": "🔮",
+"exponential": false,
+"group": "PRODUCTION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Merge Master",
+"position": Vector2(606.6666, 1140.0001),
+"purchased": 0,
+"secondary_unlock": "PRODUCTION_EXPERT",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 2.0
+}
+metadata/skill_node_id = "node_16"
+
+[node name="node_17" type="Control" parent="." unique_id=717586972]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 666.00006
+offset_top = 77.00001
+offset_right = 846.00006
+offset_bottom = 159.0
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_17"
+_node_data = {
+"cost": 300,
+"cost_increase": 0,
+"description": "Learn the basics of combat. Adds 5% critical hit chance. Gateway to the COMBAT branch — purchase to unlock Critical Eye I and Critical Strike simultaneously.",
+"effect": "CRIT_RATE",
+"emoticon": "⚔️",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Combat Training",
+"position": Vector2(595.38464, -305.51282),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 2,
+"value": 0.05
+}
+metadata/skill_node_id = "node_17"
+
+[node name="node_18" type="Control" parent="." unique_id=271065271]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 867.0681
+offset_top = 220.8025
+offset_right = 1047.0681
+offset_bottom = 302.8025
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_18"
+_node_data = {
+"cost": 500,
+"cost_increase": 250,
+"description": "Rank 1 of the Critical Eye rank-up chain. Adds 3% crit rate per rank. Cost increases by 250 per rank. Max all 3 ranks to rank up to Critical Eye II via blue (rank_up) arrow.",
+"effect": "CRIT_RATE",
+"emoticon": "",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": true,
+"image": "",
+"max": 3,
+"name": "Critical Eye I",
+"position": Vector2(1047.9166, 97.083305),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.03
+}
+metadata/skill_node_id = "node_18"
+
+[node name="node_19" type="Control" parent="." unique_id=449731723]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 945.5055
+offset_top = 221.45616
+offset_right = 1125.5055
+offset_bottom = 303.45618
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_19"
+_node_data = {
+"cost": 1500,
+"cost_increase": 750,
+"description": "Rank 2 of the Critical Eye chain. Adds 5% crit rate per rank (stronger than Rank 1). Rank-up child of Critical Eye I — inherits the CRIT_RATE effect automatically.",
+"effect": "CRIT_RATE",
+"emoticon": "",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": true,
+"image": "",
+"max": 3,
+"name": "Critical Eye II",
+"position": Vector2(1297.9167, 99.16667),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.05
+}
+metadata/skill_node_id = "node_19"
+
+[node name="node_2" type="Control" parent="." unique_id=980776460]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 391.34537
+offset_top = 276.62378
+offset_right = 571.34534
+offset_bottom = 358.62378
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_2"
+_node_data = {
+"cost": 100,
+"cost_increase": 50,
+"description": "A larger purse means more coins to carry. Each rank adds 15% gold gain. Cost increases by 50 per rank (flat increase). Max 3 ranks. Unlocks Market Stall and Quick Sale.",
+"effect": "MONEY_GAIN",
+"emoticon": "💰",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 3,
+"name": "Coin Purse",
+"position": Vector2(-468.3333, 274.99997),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 2,
+"value": 0.15
+}
+metadata/skill_node_id = "node_2"
+
+[node name="node_20" type="Control" parent="." unique_id=1509050873]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 1031.5251
+offset_top = 219.23376
+offset_right = 1211.5251
+offset_bottom = 301.23376
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_20"
+_node_data = {
+"cost": 4000,
+"cost_increase": 2000,
+"description": "Rank 3: The peak of critical precision. Adds 8% crit rate per rank. Final rank in this chain. Grants COMBAT_MASTERY secondary. Cost increase of 2000 makes maxing this a major commitment.",
+"effect": "CRIT_RATE",
+"emoticon": "👁️",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 3,
+"name": "Critical Eye III",
+"position": Vector2(1572.0831, 92.08333),
+"purchased": 0,
+"secondary_unlock": "COMBAT_MASTERY",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.08
+}
+metadata/skill_node_id = "node_20"
+
+[node name="node_21" type="Control" parent="." unique_id=1893725099]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 738.0
+offset_top = 95.0
+offset_right = 918.0
+offset_bottom = 177.0
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_21"
+_node_data = {
+"cost": 800,
+"cost_increase": 400,
+"description": "Make crits hit harder — +10% crit damage per rank. EXPONENTIAL + flat increase combined: costs scale very steeply. Max all 5 to unlock Chain Reaction via gold (maxed) arrow.",
+"effect": "CRIT_DAMAGE",
+"emoticon": "",
+"exponential": true,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 5,
+"name": "Critical Strike",
+"position": Vector2(752.9166, 198.33331),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 1,
+"unlocks_on_purchase": 0,
+"value": 0.1
+}
+metadata/skill_node_id = "node_21"
+
+[node name="node_22" type="Control" parent="." unique_id=750635797]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 851.90356
+offset_top = 304.99197
+offset_right = 1031.9036
+offset_bottom = 386.99197
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_22"
+_node_data = {
+"cost": 5000,
+"cost_increase": 0,
+"description": "Critical Strike must be fully maxed to unlock this. Attacks chain to 2 additional nearby targets. Unlocks Combo Expert when purchased (green arrow). Shares the lightning emoticon.",
+"effect": "CHAIN_LIGHTNING",
+"emoticon": "⚡",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Chain Reaction",
+"position": Vector2(999.5835, 365.41663),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 2.0
+}
+metadata/skill_node_id = "node_22"
+
+[node name="node_23" type="Control" parent="." unique_id=1188579314]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 929.29517
+offset_top = 361.33618
+offset_right = 1109.2952
+offset_bottom = 443.33618
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_23"
+_node_data = {
+"cost": 2000,
+"cost_increase": 0,
+"description": "Build up combos to amplify damage — +5% combo bonus per rank. Fixed cost per rank (no increase, no exponential). Max all 5 to unlock Area Sweep via gold (maxed) arrow.",
+"effect": "COMBO_BONUS",
+"emoticon": "",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 5,
+"name": "Combo Expert",
+"position": Vector2(1246.2501, 545),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 0.05
+}
+metadata/skill_node_id = "node_23"
+
+[node name="node_24" type="Control" parent="." unique_id=1206853581]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 983.5476
+offset_top = 411.14392
+offset_right = 1163.5476
+offset_bottom = 493.14392
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_24"
+_node_data = {
+"cost": 8000,
+"cost_increase": 0,
+"description": "Max Combo Expert to unlock via gold arrow: attacks affect a 1.5x larger area. Capstone of the Combat branch. Uses an SVG icon. Grants COMBAT_MASTERY secondary when purchased.",
+"effect": "AREA_OF_EFFECT",
+"emoticon": "🧹",
+"exponential": false,
+"group": "COMBAT",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Area Sweep",
+"position": Vector2(1419.1666, 703.75),
+"purchased": 0,
+"secondary_unlock": "COMBAT_MASTERY",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 1.5
+}
+metadata/skill_node_id = "node_24"
+
+[node name="node_25" type="Control" parent="." unique_id=1755432915]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 591.0
+offset_top = 137.0
+offset_right = 771.0
+offset_bottom = 219.0
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_25"
+_node_data = {
+"cost": 100,
+"cost_increase": 0,
+"description": "Begin your education and earn 10% more XP from all activities. Gateway to the PROGRESSION and DROP branches — purchase to unlock Quick Study and Loot Sense.",
+"effect": "EXPERIENCE_GAIN",
+"emoticon": "📚",
+"exponential": false,
+"group": "PROGRESSION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Student's Path",
+"position": Vector2(0, 300),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 2,
+"value": 0.1
+}
+metadata/skill_node_id = "node_25"
+
+[node name="node_26" type="Control" parent="." unique_id=977034713]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 475.53482
+offset_top = 347.21744
+offset_right = 655.5348
+offset_bottom = 429.21744
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_26"
+_node_data = {
+"cost": 250,
+"cost_increase": 125,
+"description": "Absorb knowledge faster — +5% leveling speed per rank. Cost increases by 125 per rank. MAX this skill (gold arrow required) to unlock Bargain Hunter; just purchasing it is not enough.",
+"effect": "LEVEL_SPEED",
+"emoticon": "",
+"exponential": false,
+"group": "PROGRESSION",
+"has_rank_up_child": false,
+"image": "",
+"max": 5,
+"name": "Quick Study",
+"position": Vector2(-200, 500),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 1,
+"unlocks_on_purchase": 0,
+"value": 0.05
+}
+metadata/skill_node_id = "node_26"
+
+[node name="node_27" type="Control" parent="." unique_id=689351380]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 475.53482
+offset_top = 409.96735
+offset_right = 655.5348
+offset_bottom = 491.96735
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_27"
+_node_data = {
+"cost": 2000,
+"cost_increase": 0,
+"description": "All upgrades cost 10% less — a strong investment that pays for itself over time. Requires Quick Study to be FULLY MAXED (gold arrow). Uses a tag emoticon and no secondary.",
+"effect": "UPGRADE_DISCOUNT",
+"emoticon": "🏷️",
+"exponential": false,
+"group": "PROGRESSION",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Bargain Hunter",
+"position": Vector2(-200, 700),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.1
+}
+metadata/skill_node_id = "node_27"
+
+[node name="node_28" type="Control" parent="." unique_id=767906856]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 601.03467
+offset_top = 347.21744
+offset_right = 781.03467
+offset_bottom = 429.21744
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_28"
+_node_data = {
+"cost": 500,
+"cost_increase": 0,
+"description": "You develop a nose for treasure — +15% item drop rate. In the DROP group (different color from PROGRESSION neighbors). Unlocks Treasure Hunter when purchased.",
+"effect": "DROP_RATE",
+"emoticon": "💎",
+"exponential": false,
+"group": "DROP",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Loot Sense",
+"position": Vector2(200, 500),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 0.15
+}
+metadata/skill_node_id = "node_28"
+
+[node name="node_29" type="Control" parent="." unique_id=151886011]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 601.03467
+offset_top = 409.96735
+offset_right = 781.03467
+offset_bottom = 491.96735
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_29"
+_node_data = {
+"cost": 1500,
+"cost_increase": 750,
+"description": "Seek out higher-quality loot — +10% drop quality per rank. Cost increases by 750 per rank. Max all 3 ranks to unlock Night Owl via gold (maxed) arrow.",
+"effect": "DROP_QUALITY",
+"emoticon": "",
+"exponential": false,
+"group": "DROP",
+"has_rank_up_child": false,
+"image": "",
+"max": 3,
+"name": "Treasure Hunter",
+"position": Vector2(200, 700),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 1,
+"unlocks_on_purchase": 0,
+"value": 0.1
+}
+metadata/skill_node_id = "node_29"
+
+[node name="node_3" type="Control" parent="." unique_id=1492776167]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 312.38507
+offset_top = 357.15283
+offset_right = 492.38507
+offset_bottom = 439.15283
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_3"
+_node_data = {
+"cost": 500,
+"cost_increase": 0,
+"description": "Open a market stall and multiply all earnings by 1.5x. Requires Coin Purse to be purchased (green arrow). Max this single-rank node to unlock Wholesale Deal via the gold (maxed) arrow.",
+"effect": "MONEY_MULTIPLIER",
+"emoticon": "",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Market Stall",
+"position": Vector2(-720, 531.6666),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 1,
+"value": 1.5
+}
+metadata/skill_node_id = "node_3"
+
+[node name="node_30" type="Control" parent="." unique_id=1409451499]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 601.03467
+offset_top = 472.7173
+offset_right = 781.03467
+offset_bottom = 554.7173
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_30"
+_node_data = {
+"cost": 6000,
+"cost_increase": 0,
+"description": "Earn 50% of active income even while offline. Requires Treasure Hunter fully maxed. Capstone of the DROP branch. Uses a load-game SVG icon. Grants PRESTIGE_UNLOCK secondary.",
+"effect": "OFFLINE_EARNINGS",
+"emoticon": "🦉",
+"exponential": false,
+"group": "DROP",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Night Owl",
+"position": Vector2(200, 900),
+"purchased": 0,
+"secondary_unlock": "PRESTIGE_UNLOCK",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.5
+}
+metadata/skill_node_id = "node_30"
+
+[node name="node_4" type="Control" parent="." unique_id=275327728]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 282.57886
+offset_top = 411.53607
+offset_right = 462.57886
+offset_bottom = 493.53607
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_4"
+_node_data = {
+"cost": 1200,
+"cost_increase": 0,
+"description": "Bulk pricing means bigger profits. Adds 20% gold multiplier per rank. EXPONENTIAL costs — each rank costs significantly more than the last even without cost_increase. Uses a project icon as its display image (res:// path in the emoticon field). Grants PRESTIGE_UNLOCK secondary.",
+"effect": "MONEY_MULTIPLIER",
+"emoticon": "💸",
+"exponential": true,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 5,
+"name": "Wholesale Deal",
+"position": Vector2(-815, 704.99994),
+"purchased": 0,
+"secondary_unlock": "PRESTIGE_UNLOCK",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.2
+}
+metadata/skill_node_id = "node_4"
+
+[node name="node_5" type="Control" parent="." unique_id=562810479]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 402.8495
+offset_top = 328.5232
+offset_right = 582.8495
+offset_bottom = 410.5232
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_5"
+_node_data = {
+"cost": 200,
+"cost_increase": 0,
+"description": "Speed up transactions and add 25% more power to each manual click. No icon, no secondary — a plain single-rank utility node. Requires Coin Purse purchased.",
+"effect": "CLICK_POWER",
+"emoticon": "",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Quick Sale",
+"position": Vector2(-431.6667, 440.41666),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.25
+}
+metadata/skill_node_id = "node_5"
+
+[node name="node_6" type="Control" parent="." unique_id=1158192700]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 522.0
+offset_top = 105.0
+offset_right = 702.0
+offset_bottom = 187.0
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_6"
+_node_data = {
+"cost": 150,
+"cost_increase": 75,
+"description": "Train your clicking speed. Adds 20% click power per rank. Cost increases by 75 per rank. Max this out (gold arrow) to unlock Gold Rush; purchase it (green arrow) to unlock Click Power I.",
+"effect": "CLICK_POWER",
+"emoticon": "👆",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 3,
+"name": "Quick Fingers",
+"position": Vector2(-773.3334, 136.66667),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 1,
+"unlocks_on_purchase": 1,
+"value": 0.2
+}
+metadata/skill_node_id = "node_6"
+
+[node name="node_7" type="Control" parent="." unique_id=538708648]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 221.9206
+offset_top = 271.39465
+offset_right = 401.9206
+offset_bottom = 353.39465
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_7"
+_node_data = {
+"cost": 300,
+"cost_increase": 0,
+"description": "Rank 1 of the Click Power rank-up chain. Grants +50% click strength. Rank-up arrows (blue) connect this to Click Power II — max this node to promote it to the next rank.",
+"effect": "CLICK_POWER",
+"emoticon": "",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": true,
+"image": "",
+"max": 1,
+"name": "Click Power I",
+"position": Vector2(-1008.3333, 258.33334),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 0.5
+}
+metadata/skill_node_id = "node_7"
+
+[node name="node_8" type="Control" parent="." unique_id=1629902400]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 152.89566
+offset_top = 270.34882
+offset_right = 332.89566
+offset_bottom = 352.34882
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_8"
+_node_data = {
+"cost": 800,
+"cost_increase": 0,
+"description": "Rank 2: Clicks hit much harder — +100% click strength. Rank-up child of Click Power I, meaning Click Power I must be maxed to unlock this. Inherits CLICK_POWER effect from its parent.",
+"effect": "CLICK_POWER",
+"emoticon": "",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": true,
+"image": "",
+"max": 1,
+"name": "Click Power II",
+"position": Vector2(-1228.3335, 254.99998),
+"purchased": 0,
+"secondary_unlock": "NONE",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 1.0
+}
+metadata/skill_node_id = "node_8"
+
+[node name="node_9" type="Control" parent="." unique_id=1483970922]
+custom_minimum_size = Vector2(180, 82)
+anchors_preset = 0
+offset_left = 64.0
+offset_top = 267.2113
+offset_right = 244.0
+offset_bottom = 349.2113
+scale = Vector2(0.31374955, 0.31374955)
+script = ExtResource("2_qaik4")
+_node_id = "node_9"
+_node_data = {
+"cost": 2000,
+"cost_increase": 0,
+"description": "Rank 3: Maximum clicking potential — +200% click strength. Final rank in the Click Power chain. Grants COMBAT_MASTERY secondary when purchased. Uses a lightning emoticon.",
+"effect": "CLICK_POWER",
+"emoticon": "⚡",
+"exponential": false,
+"group": "ECONOMY",
+"has_rank_up_child": false,
+"image": "",
+"max": 1,
+"name": "Click Power III",
+"position": Vector2(-1511.6666, 244.99998),
+"purchased": 0,
+"secondary_unlock": "COMBAT_MASTERY",
+"unlocks_on_max": 0,
+"unlocks_on_purchase": 0,
+"value": 2.0
+}
+metadata/skill_node_id = "node_9"

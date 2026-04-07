@@ -298,7 +298,8 @@ func _node_edge_point(id: String, other_center: Vector2) -> Vector2:
 		t = minf(t, -half_h / dir.y)
 	if t == INF:
 		return center
-	return center + dir * t
+	# Pull 5 world units inside the border so the arrow tail is never visible outside the card.
+	return center + dir * maxf(t - 5.0, 0.0)
 
 func _sync_layer_sizes() -> void:
 	var sz := _canvas_clip.size
@@ -670,11 +671,21 @@ func _draw_bezier(ci: CanvasItem, from: Vector2, to: Vector2, color: Color, widt
 			it*it*it*from.y + 3.0*it*it*t*c1.y + 3.0*it*t*t*c2.y + t*t*t*to.y))
 	if pts.size() >= 2:
 		var tip: Vector2 = pts[pts.size() - 1]
-		var prev: Vector2 = pts[pts.size() - 2]
-		var dir: Vector2 = (tip - prev).normalized()
+		# Use the analytical Bezier tangent at t=1 (= 3*(to - c2)) for a stable
+		# arrowhead direction that never flickers when the last polyline segment is short.
+		var tangent: Vector2 = to - c2
+		var dir: Vector2
+		if tangent.length_squared() >= 0.0001:
+			dir = tangent.normalized()
+		else:
+			dir = (tip - pts[pts.size() - 2]).normalized()
 		var sz := width * 4.0
 		if dir.length_squared() >= 0.0001:
-			pts[pts.size() - 1] = tip - dir * sz  # stop line at arrowhead base
+			# Drop all points inside the arrowhead zone so the last polyline
+			# segment arrives cleanly at the arrowhead base with no kink.
+			while pts.size() > 1 and pts[pts.size() - 1].distance_to(tip) <= sz:
+				pts.resize(pts.size() - 1)
+			pts.append(tip - dir * sz)
 		ci.draw_polyline(pts, color, width, true)
 		# Arrowhead
 		if dir.length_squared() >= 0.0001:
