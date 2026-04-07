@@ -107,20 +107,20 @@ func _load_defaults() -> void:
 	custom_groups = [
 		{"label": "ECONOMY", "effects": PackedStringArray([
 			"MONEY_GAIN", "MONEY_MULTIPLIER", "CLICK_POWER", "CLICK_MULTIPLIER",
-			"PRESTIGE_BONUS", "PRESTIGE_MULTIPLIER"])},
+			"PRESTIGE_BONUS", "PRESTIGE_MULTIPLIER"]), "color": Color(0.92, 0.78, 0.32)},
 		{"label": "COMBAT", "effects": PackedStringArray([
 			"CRIT_RATE", "CRIT_DAMAGE", "CHAIN_LIGHTNING", "COMBO_BONUS",
-			"AREA_OF_EFFECT", "PROJECTILE_COUNT", "PROJECTILE_SPEED"])},
+			"AREA_OF_EFFECT", "PROJECTILE_COUNT", "PROJECTILE_SPEED"]), "color": Color(0.92, 0.42, 0.42)},
 		{"label": "PRODUCTION", "effects": PackedStringArray([
 			"AUTO_CLICK", "IDLE_SPEED", "SPAWN_RATE", "SPAWN_AMOUNT",
-			"MERGE_SPEED", "MERGE_VALUE"])},
+			"MERGE_SPEED", "MERGE_VALUE"]), "color": Color(0.38, 0.82, 0.48)},
 		{"label": "PROGRESSION", "effects": PackedStringArray([
 			"EXPERIENCE_GAIN", "LEVEL_SPEED", "UNLOCK_SPEED",
-			"UPGRADE_DISCOUNT", "COOLDOWN_REDUCTION", "DURATION_BONUS"])},
+			"UPGRADE_DISCOUNT", "COOLDOWN_REDUCTION", "DURATION_BONUS"]), "color": Color(0.40, 0.60, 0.92)},
 		{"label": "DROP", "effects": PackedStringArray([
-			"DROP_RATE", "DROP_QUALITY", "OFFLINE_EARNINGS"])},
+			"DROP_RATE", "DROP_QUALITY", "OFFLINE_EARNINGS"]), "color": Color(0.72, 0.48, 0.92)},
 		{"label": "CUSTOM", "effects": PackedStringArray([
-			"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5"])},
+			"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5"]), "color": Color(0.62, 0.62, 0.62)},
 	]
 	custom_secondary_unlocks = PackedStringArray(["NONE"])
 
@@ -385,11 +385,11 @@ func rename_effect(old_name: String, new_name: String) -> void:
 	data_changed.emit()
 
 
-func add_group(label: String, effects: PackedStringArray = PackedStringArray()) -> void:
+func add_group(label: String, effects: PackedStringArray = PackedStringArray(), color: Color = Color.TRANSPARENT) -> void:
 	for g in custom_groups:
 		if g["label"] == label:
 			return
-	custom_groups.append({"label": label, "effects": effects})
+	custom_groups.append({"label": label, "effects": effects, "color": color})
 	data_changed.emit()
 
 
@@ -419,6 +419,25 @@ func rename_group(old_label: String, new_label: String) -> void:
 			for nid in nodes:
 				if nodes[nid].get("group", "") == old_label:
 					nodes[nid]["group"] = new_label
+			data_changed.emit()
+			return
+
+
+func get_group_color(label: String) -> Color:
+	## Returns the accent color for the given group label, or Color.TRANSPARENT if none.
+	for g in custom_groups:
+		if g["label"] == label:
+			var c = g.get("color", Color.TRANSPARENT)
+			if c is Color:
+				return c as Color
+			return Color.TRANSPARENT
+	return Color.TRANSPARENT
+
+
+func set_group_color(label: String, color: Color) -> void:
+	for g in custom_groups:
+		if g["label"] == label:
+			g["color"] = color
 			data_changed.emit()
 			return
 
@@ -530,7 +549,8 @@ func to_dict() -> Dictionary:
 		var ge := []
 		for e in g.get("effects", PackedStringArray()):
 			ge.append(e)
-		groups_arr.append({"label": g["label"], "effects": ge})
+		var gc: Color = g.get("color", Color.TRANSPARENT)
+		groups_arr.append({"label": g["label"], "effects": ge, "color": gc.to_html(false)})
 
 	var sec_arr := []
 	for s in custom_secondary_unlocks:
@@ -565,9 +585,12 @@ func from_dict(data: Dictionary) -> void:
 			for e in g.get("effects", []):
 				effs.append(str(e))
 			var lbl := str(g.get("label", ""))
+			var clr_str: String = str(g.get("color", ""))
+			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.TRANSPARENT
 			custom_groups.append({
 				"label": lbl,
 				"effects": effs,
+				"color": clr,
 			})
 			# Build migration map for legacy configs that stored short IDs instead of labels
 			var legacy_id := str(g.get("flag", ""))

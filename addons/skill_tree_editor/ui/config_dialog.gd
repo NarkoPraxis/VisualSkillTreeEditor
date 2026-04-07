@@ -25,7 +25,11 @@ var _sec_rename_btn: Button
 var _sec_remove_btn: Button
 
 # ── Groups tab refs ─────────────────────────────────────────────────────
-var _grp_tree: Tree
+var _grp_scroll: ScrollContainer
+var _grp_list_vbox: VBoxContainer
+var _grp_selected_label: String = ""
+var _grp_row_btns: Dictionary = {}
+var _grp_color_pickers: Dictionary = {}
 var _grp_label_field: LineEdit
 var _grp_add_btn: Button
 var _grp_rename_btn: Button
@@ -392,17 +396,15 @@ func _build_groups_page() -> VBoxContainer:
 	top.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	top.add_theme_constant_override("separation", 4)
 
-	_grp_tree = Tree.new()
-	_grp_tree.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_grp_tree.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_grp_tree.custom_minimum_size = Vector2(0, 120)
-	_grp_tree.columns = 1
-	_grp_tree.column_titles_visible = false
-	_grp_tree.set_column_expand(0, true)
-	_grp_tree.hide_root = true
-	_grp_tree.item_selected.connect(_on_grp_selected)
-	_grp_tree.gui_input.connect(_on_grp_tree_input)
-	top.add_child(_grp_tree)
+	_grp_scroll = ScrollContainer.new()
+	_grp_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_grp_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_grp_scroll.custom_minimum_size = Vector2(0, 120)
+	_grp_list_vbox = VBoxContainer.new()
+	_grp_list_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_grp_list_vbox.add_theme_constant_override("separation", 2)
+	_grp_scroll.add_child(_grp_list_vbox)
+	top.add_child(_grp_scroll)
 	top.add_child(_spacer_v(4))
 
 	var add_row := HBoxContainer.new()
@@ -481,38 +483,79 @@ func _build_groups_page() -> VBoxContainer:
 
 
 func _refresh_groups() -> void:
-	var prev_label := _get_grp_selected_label()
-	_grp_tree.clear()
-	var root := _grp_tree.create_item()
+	var prev_label: String = _grp_selected_label
+	_grp_selected_label = ""
+	_grp_row_btns.clear()
+	_grp_color_pickers.clear()
+	while _grp_list_vbox.get_child_count() > 0:
+		var child := _grp_list_vbox.get_child(0)
+		_grp_list_vbox.remove_child(child)
+		child.queue_free()
+
 	for g in _ctx.custom_groups:
-		var item := _grp_tree.create_item(root)
-		item.set_text(0, g["label"])
-		item.set_metadata(0, g["label"])
-	if prev_label != "":
+		var lbl: String = g["label"]
+		var clr: Color = _ctx.get_group_color(lbl)
+		var row := _build_grp_row(lbl, clr)
+		_grp_list_vbox.add_child(row)
+
+	if prev_label != "" and _grp_row_btns.has(prev_label):
 		_select_grp_by_label(prev_label)
-	var has_sel := _grp_tree.get_selected() != null
+	else:
+		_grp_effects_panel.visible = false
+
+	var has_sel := _grp_selected_label != ""
 	_grp_rename_btn.disabled = not has_sel
 	_grp_remove_btn.disabled = not has_sel
 
 
+func _build_grp_row(label: String, color: Color) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var btn := Button.new()
+	btn.text = label
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.pressed.connect(func(): _select_grp_by_label(label))
+	btn.gui_input.connect(func(ev: InputEvent): _on_grp_row_input(ev, label))
+	_style_grp_btn(btn, false)
+	row.add_child(btn)
+	_grp_row_btns[label] = btn
+
+	var cpb := ColorPickerButton.new()
+	cpb.color = color
+	cpb.custom_minimum_size = Vector2(64, 28)
+	cpb.tooltip_text = "Group color (used for node background and border)"
+	cpb.color_changed.connect(func(c: Color): _on_grp_color_changed(label, c))
+	row.add_child(cpb)
+	_grp_color_pickers[label] = cpb
+
+	return row
+
+
+func _style_grp_btn(btn: Button, selected: bool) -> void:
+	if selected:
+		btn.add_theme_stylebox_override("normal", _make_stylebox(Color(0.18, 0.36, 0.60), 4))
+		btn.add_theme_stylebox_override("hover",  _make_stylebox(Color(0.22, 0.42, 0.68), 4))
+	else:
+		btn.add_theme_stylebox_override("normal", _make_stylebox(Color(0.13, 0.13, 0.16), 4))
+		btn.add_theme_stylebox_override("hover",  _make_stylebox(Color(0.20, 0.20, 0.26), 4))
+
+
 func _get_grp_selected_label() -> String:
-	var sel := _grp_tree.get_selected()
-	if sel:
-		return sel.get_metadata(0)
-	return ""
+	return _grp_selected_label
 
 
 func _select_grp_by_label(label: String) -> void:
-	var root := _grp_tree.get_root()
-	if not root:
-		return
-	var child := root.get_first_child()
-	while child:
-		if child.get_metadata(0) == label:
-			child.select(0)
-			_on_grp_selected()
-			return
-		child = child.get_next()
+	# Deselect previous
+	if _grp_selected_label != "" and _grp_row_btns.has(_grp_selected_label):
+		_style_grp_btn(_grp_row_btns[_grp_selected_label] as Button, false)
+	_grp_selected_label = label
+	# Highlight new selection
+	if label != "" and _grp_row_btns.has(label):
+		_style_grp_btn(_grp_row_btns[label] as Button, true)
+	_on_grp_selected()
 
 
 func _on_grp_selected() -> void:
@@ -558,10 +601,9 @@ func _do_grp_add() -> void:
 
 
 func _do_grp_rename() -> void:
-	var sel := _grp_tree.get_selected()
-	if not sel:
+	if _grp_selected_label == "":
 		return
-	var old_label: String = sel.get_metadata(0)
+	var old_label: String = _grp_selected_label
 	var new_label := _sanitize(_grp_label_field.text)
 	if new_label == "" or new_label == old_label:
 		return
@@ -612,18 +654,22 @@ func _on_grp_field_input(event: InputEvent) -> void:
 			get_viewport().set_input_as_handled()
 
 
-func _on_grp_tree_input(event: InputEvent) -> void:
+func _on_grp_row_input(event: InputEvent, label: String) -> void:
 	if event is InputEventKey and event.pressed:
+		if _grp_selected_label != label:
+			return
 		if event.keycode == KEY_DELETE:
 			_do_grp_remove()
 			get_viewport().set_input_as_handled()
 		elif event.keycode == KEY_F2:
-			var sel := _grp_tree.get_selected()
-			if sel:
-				_grp_label_field.text = sel.get_metadata(0)
-				_grp_label_field.grab_focus()
-				_grp_label_field.select_all()
+			_grp_label_field.text = label
+			_grp_label_field.grab_focus()
+			_grp_label_field.select_all()
 			get_viewport().set_input_as_handled()
+
+
+func _on_grp_color_changed(label: String, color: Color) -> void:
+	_ctx.set_group_color(label, color)
 
 
 func _on_grp_effects_list_input(event: InputEvent) -> void:

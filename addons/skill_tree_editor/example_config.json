@@ -118,6 +118,7 @@
 	],
 	"groups": [
 		{
+			"color": "eb4e4e",
 			"effects": [
 				"DAMAGE",
 				"ATTACK_SPEED",
@@ -131,6 +132,7 @@
 			"label": "OFFENSE"
 		},
 		{
+			"color": "4e7aeb",
 			"effects": [
 				"HEALTH",
 				"HEALTH_REGEN",
@@ -144,6 +146,7 @@
 			"label": "DEFENSE"
 		},
 		{
+			"color": "9e4eeb",
 			"effects": [
 				"MANA",
 				"MANA_REGEN",
@@ -156,6 +159,7 @@
 			"label": "MAGIC"
 		},
 		{
+			"color": "4eeb7a",
 			"effects": [
 				"MOVEMENT_SPEED",
 				"JUMP_HEIGHT",
@@ -168,6 +172,7 @@
 			"label": "UTILITY"
 		},
 		{
+			"color": "ebc84e",
 			"effects": [
 				"LIFESTEAL",
 				"THORNS",
@@ -177,6 +182,7 @@
 			"label": "PASSIVE"
 		},
 		{
+			"color": "4eebc8",
 			"effects": [
 				"SUMMON_DAMAGE",
 				"SUMMON_HEALTH",
@@ -185,18 +191,22 @@
 			"label": "SUMMONS"
 		},
 		{
+			"color": "9e9e9e",
 			"effects": [],
 			"label": "CUSTOM"
 		},
 		{
+			"color": "eb4eb8",
 			"effects": [],
 			"label": "TEST"
 		},
 		{
+			"color": "4eb8eb",
 			"effects": [],
 			"label": "ETSET"
 		},
 		{
+			"color": "eb8c4e",
 			"effects": [
 				"POISON_DAMAGE",
 				"ICE_DAMAGE",
@@ -224,8 +234,8 @@
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				568.5,
-				-210.25
+				577.25,
+				-200.25
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -447,16 +457,16 @@
 			"cost": 100,
 			"cost_increase": 0,
 			"description": "",
-			"effect": "NONE",
+			"effect": "JUMP_HEIGHT",
 			"emoticon": "😉",
 			"exponential": false,
-			"group": "",
+			"group": "UTILITY",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				368.75,
-				102.5
+				395.0,
+				77.5
 			],
 			"purchased": 0,
 			"secondary_unlock": "A",
@@ -560,8 +570,8 @@
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				742.75,
-				85.0
+				746.75,
+				71.0
 			],
 			"purchased": 0,
 			"secondary_unlock": "A",
@@ -602,8 +612,8 @@
 			"max": 1,
 			"name": "New Skill I",
 			"position": [
-				335.25,
-				-61.25
+				301.5,
+				-115.0
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -623,8 +633,8 @@
 			"max": 1,
 			"name": "New Skill I I",
 			"position": [
-				71.5000152587891,
-				-22.5
+				36.5000152587891,
+				-48.75
 			],
 			"purchased": 1,
 			"secondary_unlock": "",
@@ -644,8 +654,8 @@
 			"max": 1,
 			"name": "New Skill I I I",
 			"position": [
-				-178.499984741211,
-				28.75
+				-197.25,
+				33.75
 			],
 			"purchased": 0,
 			"secondary_unlock": "",

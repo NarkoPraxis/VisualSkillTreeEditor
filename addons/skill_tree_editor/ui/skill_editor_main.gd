@@ -333,6 +333,28 @@ func _zoom_at(sp: Vector2, delta: float) -> void:
 	_redraw_overlay()
 
 
+# ── Group color helpers ───────────────────────────────────────────────────
+
+func _grp_bg(grp: String) -> Color:
+	if grp == "" or not _ctx:
+		return DEFAULT_BG
+	var c: Color = _ctx.get_group_color(grp)
+	if c == Color.TRANSPARENT:
+		return DEFAULT_BG
+	return c.darkened(0.70)
+
+
+func _grp_border(grp: String) -> Color:
+	if grp == "" or not _ctx:
+		return DEFAULT_BORDER
+	var c: Color = _ctx.get_group_color(grp)
+	if c == Color.TRANSPARENT:
+		return DEFAULT_BORDER
+	var b: Color = c
+	b.a = 0.70
+	return b
+
+
 # ── Signals ──────────────────────────────────────────────────────────────
 
 func _wire() -> void:
@@ -396,8 +418,8 @@ func _create_card(id: String) -> void:
 	var grp: String = d.get("group", "")
 	var sty := StyleBoxFlat.new()
 	sty.set_corner_radius_all(8)
-	sty.bg_color = GRP_BG.get(grp, DEFAULT_BG)
-	sty.border_color = GRP_BORDER.get(grp, DEFAULT_BORDER)
+	sty.bg_color = _grp_bg(grp)
+	sty.border_color = _grp_border(grp)
 	sty.set_border_width_all(2)
 	sty.set_content_margin_all(8)
 	panel.add_theme_stylebox_override("panel", sty)
@@ -549,7 +571,7 @@ func _refresh_card(id: String) -> void:
 	var grp: String = d.get("group", "")
 	var sty: StyleBoxFlat = c["style"]
 	# Always sync background so group changes take effect immediately
-	sty.bg_color = GRP_BG.get(grp, DEFAULT_BG)
+	sty.bg_color = _grp_bg(grp)
 	var border_col: Color
 	if id == _ctx.selected_skill_id:
 		border_col = SEL_BORDER
@@ -564,7 +586,7 @@ func _refresh_card(id: String) -> void:
 		border_col = PURCHASED_BORDER
 		sty.set_border_width_all(2)
 	else:
-		border_col = GRP_BORDER.get(grp, DEFAULT_BORDER)
+		border_col = _grp_border(grp)
 		sty.set_border_width_all(2)
 	sty.border_color = border_col
 	if c.has("badge_sty") and is_instance_valid(c["badge_sty"]):

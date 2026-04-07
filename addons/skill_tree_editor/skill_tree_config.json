@@ -93,7 +93,8 @@
 				"LIGHTNING_DAMAGE",
 				"POISON_DAMAGE"
 			],
-			"label": "OFFENSE"
+			"label": "OFFENSE",
+			"color": "eb4e4e"
 		},
 		{
 			"effects": [
@@ -106,7 +107,8 @@
 				"LIGHTNING_RESIST",
 				"POISON_RESIST"
 			],
-			"label": "DEFENSE"
+			"label": "DEFENSE",
+			"color": "4e7aeb"
 		},
 		{
 			"effects": [
@@ -118,7 +120,8 @@
 				"PROJECTILE_COUNT",
 				"PROJECTILE_SPEED"
 			],
-			"label": "MAGIC"
+			"label": "MAGIC",
+			"color": "9e4eeb"
 		},
 		{
 			"effects": [
@@ -130,7 +133,8 @@
 				"LUCK",
 				"ITEM_FIND"
 			],
-			"label": "UTILITY"
+			"label": "UTILITY",
+			"color": "4eeb7a"
 		},
 		{
 			"effects": [
@@ -139,7 +143,8 @@
 				"STUN_CHANCE",
 				"KNOCKBACK"
 			],
-			"label": "PASSIVE"
+			"label": "PASSIVE",
+			"color": "ebc84e"
 		},
 		{
 			"effects": [
@@ -147,7 +152,8 @@
 				"SUMMON_HEALTH",
 				"SUMMON_COUNT"
 			],
-			"label": "SUMMONS"
+			"label": "SUMMONS",
+			"color": "4eebc8"
 		},
 		{
 			"effects": [
@@ -157,7 +163,8 @@
 				"CUSTOM_4",
 				"CUSTOM_5"
 			],
-			"label": "CUSTOM"
+			"label": "CUSTOM",
+			"color": "9e9e9e"
 		}
 	],
 	"next_id": 8,
