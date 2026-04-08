@@ -54,6 +54,8 @@ var _cur_add_btn: Button
 var _cur_rename_btn: Button
 var _cur_remove_btn: Button
 var _cur_confirm_dlg: ConfirmationDialog
+var _cur_icon_file_dlg: FileDialog
+var _cur_icon_editing_name: String = ""
 
 
 func setup(ctx: RefCounted) -> void:
@@ -957,13 +959,22 @@ func _build_cur_row(cname: String, color: Color, icon: String) -> HBoxContainer:
 	row.add_child(btn)
 	_cur_row_btns[cname] = btn
 
+	var icon_hb := HBoxContainer.new()
+	icon_hb.add_theme_constant_override("separation", 2)
 	var icon_edit := LineEdit.new()
 	icon_edit.text = icon
 	icon_edit.placeholder_text = "emoji or res:// path"
-	icon_edit.custom_minimum_size = Vector2(110, 0)
+	icon_edit.custom_minimum_size = Vector2(88, 0)
 	icon_edit.tooltip_text = "Icon: emoji/symbol or image path (res://)"
 	icon_edit.text_changed.connect(func(t: String): _ctx.set_currency_icon(cname, t))
-	row.add_child(icon_edit)
+	icon_hb.add_child(icon_edit)
+	var file_btn := Button.new()
+	file_btn.text = "\ud83d\udcc2"
+	file_btn.tooltip_text = "Choose image file"
+	file_btn.custom_minimum_size = Vector2(28, 0)
+	file_btn.pressed.connect(func(): _open_cur_icon_file_dialog(cname, icon_edit))
+	icon_hb.add_child(file_btn)
+	row.add_child(icon_hb)
 	_cur_icon_edits[cname] = icon_edit
 
 	var cpb := ColorPickerButton.new()
@@ -1038,6 +1049,26 @@ func _on_cur_remove_confirmed() -> void:
 	_ctx.remove_currency(cname)
 	_cur_selected_name = ""
 	_refresh_currencies()
+
+
+func _open_cur_icon_file_dialog(cname: String, icon_edit: LineEdit) -> void:
+	_cur_icon_editing_name = cname
+	if not _cur_icon_file_dlg or not is_instance_valid(_cur_icon_file_dlg):
+		_cur_icon_file_dlg = FileDialog.new()
+		_cur_icon_file_dlg.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+		_cur_icon_file_dlg.access = FileDialog.ACCESS_RESOURCES
+		_cur_icon_file_dlg.filters = PackedStringArray(["*.png ; PNG", "*.svg ; SVG"])
+		_cur_icon_file_dlg.file_selected.connect(_on_cur_icon_file_selected)
+		add_child(_cur_icon_file_dlg)
+	_cur_icon_file_dlg.popup_centered(Vector2i(640, 480))
+
+
+func _on_cur_icon_file_selected(path: String) -> void:
+	var cname: String = _cur_icon_editing_name
+	if cname == "" or not _cur_icon_edits.has(cname):
+		return
+	(_cur_icon_edits[cname] as LineEdit).text = path
+	_ctx.set_currency_icon(cname, path)
 
 
 func _on_cur_field_input(event: InputEvent) -> void:

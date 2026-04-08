@@ -127,8 +127,8 @@ func _load_defaults() -> void:
 	]
 	custom_secondary_unlocks = PackedStringArray(["NONE"])
 	custom_currencies = [
-		{"name": "GOLD",    "color": Color(0.92, 0.78, 0.32), "icon": "\U0001FA99"},
-		{"name": "DIAMOND", "color": Color(0.40, 0.60, 0.92), "icon": "\U0001F48E"},
+		{"name": "GOLD",    "color": Color(0.92, 0.78, 0.32), "icon": "🪙"},
+		{"name": "DIAMOND", "color": Color(0.40, 0.60, 0.92), "icon": "💎"},
 	]
 
 
@@ -392,7 +392,7 @@ func rename_effect(old_name: String, new_name: String) -> void:
 	data_changed.emit()
 
 
-func add_group(label: String, effects: PackedStringArray = PackedStringArray(), color: Color = Color.TRANSPARENT) -> void:
+func add_group(label: String, effects: PackedStringArray = PackedStringArray(), color: Color = Color.WHITE) -> void:
 	for g in custom_groups:
 		if g["label"] == label:
 			return
@@ -431,14 +431,14 @@ func rename_group(old_label: String, new_label: String) -> void:
 
 
 func get_group_color(label: String) -> Color:
-	## Returns the accent color for the given group label, or Color.TRANSPARENT if none.
+	## Returns the accent color for the given group label, or Color.WHITE if none set.
 	for g in custom_groups:
 		if g["label"] == label:
-			var c = g.get("color", Color.TRANSPARENT)
+			var c = g.get("color", Color.WHITE)
 			if c is Color:
 				return c as Color
-			return Color.TRANSPARENT
-	return Color.TRANSPARENT
+			return Color.WHITE
+	return Color.WHITE
 
 
 func set_group_color(label: String, color: Color) -> void:
@@ -530,7 +530,7 @@ func snake_to_title(s: String) -> String:
 	return " ".join(out)
 
 
-func add_currency(name: String, color: Color = Color.TRANSPARENT, icon: String = "") -> void:
+func add_currency(name: String, color: Color = Color.WHITE, icon: String = "") -> void:
 	for cur in custom_currencies:
 		if cur["name"] == name:
 			return
@@ -576,11 +576,11 @@ func rename_currency(old_name: String, new_name: String) -> void:
 func get_currency_color(name: String) -> Color:
 	for cur in custom_currencies:
 		if cur["name"] == name:
-			var c = cur.get("color", Color.TRANSPARENT)
+			var c = cur.get("color", Color.WHITE)
 			if c is Color:
 				return c as Color
-			return Color.TRANSPARENT
-	return Color.TRANSPARENT
+			return Color.WHITE
+	return Color.WHITE
 
 
 func set_currency_color(name: String, color: Color) -> void:
@@ -707,7 +707,7 @@ func from_dict(data: Dictionary) -> void:
 				effs.append(str(e))
 			var lbl := str(g.get("label", ""))
 			var clr_str: String = str(g.get("color", ""))
-			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.TRANSPARENT
+			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.WHITE
 			custom_groups.append({
 				"label": lbl,
 				"effects": effs,
@@ -727,7 +727,7 @@ func from_dict(data: Dictionary) -> void:
 		custom_currencies = []
 		for cur in data["currencies"]:
 			var clr_str: String = str(cur.get("color", ""))
-			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.TRANSPARENT
+			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.WHITE
 			custom_currencies.append({
 				"name":  str(cur.get("name", "")),
 				"color": clr,

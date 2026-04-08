@@ -76,7 +76,7 @@ var _file_dlg_mode: String = ""
 var _empty_lbl: Label
 var _drag_hover: bool = false
 
-## id → { panel, style, name_lbl, costs_vbox, emote_lbl, icon_tex, count_spin, badge_panel, badge_lbl, badge_sty }
+## id → { panel, style, name_lbl, costs_vbox, emote_lbl:Label, icon_tex:TextureRect, count_spin, badge_panel, badge_lbl, badge_sty }
 var _cards: Dictionary = {}
 
 var _bold_font: Font = null  # set in _ready() from editor theme
@@ -424,45 +424,37 @@ func _create_card(id: String) -> void:
 	sty.set_content_margin_all(8)
 	panel.add_theme_stylebox_override("panel", sty)
 
-	# Main layout: HBox with optional icon column on the left
-	var main_hb := HBoxContainer.new()
-	main_hb.mouse_filter = MOUSE_FILTER_IGNORE
-	main_hb.add_theme_constant_override("separation", 6)
-	panel.add_child(main_hb)
+	# Main layout: VBox — emoticon is inline with name, no separate left column
+	var vb := VBoxContainer.new()
+	vb.mouse_filter = MOUSE_FILTER_IGNORE
+	vb.add_theme_constant_override("separation", 2)
+	vb.size_flags_horizontal = SIZE_EXPAND_FILL
+	panel.add_child(vb)
 
-	# Icon column (left of name + cost) — square, scaled to fit node height
-	var icon_size: float = NODE_H - 16.0  # subtract content margins (8px each side)
+	# Row 1: small inline emoticon + name + badge
+	var top := HBoxContainer.new()
+	top.mouse_filter = MOUSE_FILTER_IGNORE
+	top.add_theme_constant_override("separation", 4)
+	vb.add_child(top)
+
 	var icon_tex := TextureRect.new()
-	icon_tex.custom_minimum_size = Vector2(icon_size, icon_size)
+	icon_tex.custom_minimum_size = Vector2(18, 18)
 	icon_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon_tex.mouse_filter = MOUSE_FILTER_IGNORE
 	icon_tex.size_flags_vertical = SIZE_SHRINK_CENTER
 	icon_tex.visible = false
-	main_hb.add_child(icon_tex)
+	top.add_child(icon_tex)
 
 	var emote := Label.new()
 	emote.text = d.get("emoticon", "")
 	emote.visible = false
 	emote.mouse_filter = MOUSE_FILTER_IGNORE
-	emote.add_theme_font_size_override("font_size", 44)
+	emote.add_theme_font_size_override("font_size", 18)
 	emote.size_flags_vertical = SIZE_SHRINK_CENTER
-	main_hb.add_child(emote)
+	top.add_child(emote)
 
 	_apply_icon(d.get("emoticon", ""), emote, icon_tex)
-
-	# Right column: name + cost rows
-	var vb := VBoxContainer.new()
-	vb.mouse_filter = MOUSE_FILTER_IGNORE
-	vb.add_theme_constant_override("separation", 2)
-	vb.size_flags_horizontal = SIZE_EXPAND_FILL
-	main_hb.add_child(vb)
-
-	# Row 1: name + badge
-	var top := HBoxContainer.new()
-	top.mouse_filter = MOUSE_FILTER_IGNORE
-	top.add_theme_constant_override("separation", 4)
-	vb.add_child(top)
 
 	var nlbl := Label.new()
 	nlbl.text = d["name"]

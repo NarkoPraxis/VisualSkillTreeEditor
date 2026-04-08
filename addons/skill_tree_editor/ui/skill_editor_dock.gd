@@ -38,7 +38,7 @@ func setup(ctx: RefCounted) -> void:
 
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(240, 0)
+	custom_minimum_size = Vector2(250, 0)
 	size_flags_vertical = SIZE_EXPAND_FILL
 	_build_ui()
 	_wire()
@@ -80,23 +80,7 @@ func _build_ui() -> void:
 	_name_edit = _le("Name")
 	_name_edit.text_changed.connect(func(t: String): _set_prop("name", t))
 
-	# Costs section header
-	var costs_hdr := HBoxContainer.new()
-	costs_hdr.add_theme_constant_override("separation", 4)
-	var costs_lbl := Label.new()
-	costs_lbl.text = "Costs"
-	costs_lbl.add_theme_font_size_override("font_size", 11)
-	costs_lbl.custom_minimum_size = Vector2(LABEL_W, 0)
-	costs_hdr.add_child(costs_lbl)
-	_fields.add_child(costs_hdr)
-
-	# Per-currency cost rows (rebuilt on selection)
-	_costs_vbox = VBoxContainer.new()
-	_costs_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
-	_costs_vbox.add_theme_constant_override("separation", 4)
-	_fields.add_child(_costs_vbox)
-
-	# Add currency row
+	# Add currency row (above the per-currency rows)
 	var add_row := HBoxContainer.new()
 	add_row.add_theme_constant_override("separation", 4)
 	_costs_add_opt = OptionButton.new()
@@ -109,6 +93,12 @@ func _build_ui() -> void:
 	_costs_add_btn.pressed.connect(_do_add_currency_cost)
 	add_row.add_child(_costs_add_btn)
 	_fields.add_child(add_row)
+
+	# Per-currency cost rows (rebuilt on selection)
+	_costs_vbox = VBoxContainer.new()
+	_costs_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	_costs_vbox.add_theme_constant_override("separation", 3)
+	_fields.add_child(_costs_vbox)
 
 	_max_spin = _sb("Max Purchases", 1, 99, 1)
 	_max_spin.value_changed.connect(func(v: float): _set_prop("max", int(v)))
@@ -463,6 +453,52 @@ func _on_restore() -> void:
 	_ctx.data_changed.emit()
 
 
+# ── Style helpers ────────────────────────────────────────────────────────
+
+func _make_x_icon() -> ImageTexture:
+	var sz := 17
+	var img := Image.create(sz, sz, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var cx := sz / 2
+	for i in range(2, sz - 2):
+		var o := i - cx
+		for t in [-1, 0, 1]:
+			for xy in [[i, cx + o + t], [i, cx - o + t]]:
+				var px: int = xy[0]
+				var py: int = xy[1]
+				if px >= 0 and px < sz and py >= 0 and py < sz:
+					img.set_pixel(px, py, Color.WHITE)
+	return ImageTexture.create_from_image(img)
+
+
+func _style_red_btn(btn: Button) -> void:
+	btn.text = ""
+	btn.icon = _make_x_icon()
+	btn.expand_icon = false
+	btn.add_theme_stylebox_override("normal",   _red_sb(Color(0.55, 0.10, 0.10), 0))
+	btn.add_theme_stylebox_override("hover",    _red_sb(Color(0.70, 0.15, 0.15), 0))
+	btn.add_theme_stylebox_override("pressed",  _red_sb(Color(0.40, 0.08, 0.08), 0))
+	btn.add_theme_stylebox_override("disabled", _red_sb(Color(0.30, 0.08, 0.08), 0))
+	btn.add_theme_color_override("font_color",          Color.WHITE)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
+
+
+func _red_sb(bg: Color, pad: int = 4) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.corner_radius_top_left = 3
+	sb.corner_radius_top_right = 3
+	sb.corner_radius_bottom_left = 3
+	sb.corner_radius_bottom_right = 3
+	sb.content_margin_left = pad
+	sb.content_margin_right = pad
+	sb.content_margin_top = pad
+	sb.content_margin_bottom = pad
+	return sb
+
+
 # ── Multi-currency cost section ──────────────────────────────────────────
 
 func _refresh_costs_ui(id: String, d: Dictionary) -> void:
@@ -510,83 +546,71 @@ func _rebuild_costs_ui(id: String, d: Dictionary) -> void:
 		var clr: Color = _ctx.get_currency_color(cur_name)
 		var display_name: String = _ctx.snake_to_title(cur_name)
 
-		var entry_vbox := VBoxContainer.new()
-		entry_vbox.add_theme_constant_override("separation", 2)
-		entry_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+		# Single row: [name 60px] [cost spin] [inc spin] [Exp check] [× red]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 3)
+		row.size_flags_horizontal = SIZE_EXPAND_FILL
 
-		# Row 1: currency name label + remove button
-		var row1 := HBoxContainer.new()
-		row1.add_theme_constant_override("separation", 4)
 		var name_lbl := Label.new()
 		name_lbl.text = display_name
 		name_lbl.add_theme_font_size_override("font_size", 11)
 		name_lbl.add_theme_color_override("font_color", clr)
-		name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
-		row1.add_child(name_lbl)
-		var remove_btn := Button.new()
-		remove_btn.text = "\u00d7"
-		remove_btn.tooltip_text = "Remove %s cost from this skill" % display_name
-		remove_btn.custom_minimum_size = Vector2(GUTTER_W, 0)
-		remove_btn.pressed.connect(_remove_cost_entry.bind(id, cur_name))
-		row1.add_child(remove_btn)
-		entry_vbox.add_child(row1)
-
-		# Row 2: Cost spinbox + Increase spinbox + Exponential checkbox
-		var row2 := HBoxContainer.new()
-		row2.add_theme_constant_override("separation", 4)
-
-		var cost_lbl := Label.new()
-		cost_lbl.text = "Cost"
-		cost_lbl.add_theme_font_size_override("font_size", 10)
-		row2.add_child(cost_lbl)
+		name_lbl.custom_minimum_size = Vector2(60, 0)
+		name_lbl.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		name_lbl.clip_text = true
+		row.add_child(name_lbl)
 
 		var cost_spin := SpinBox.new()
 		cost_spin.min_value = 0
 		cost_spin.max_value = 99999
 		cost_spin.step = 1
-		cost_spin.size_flags_horizontal = SIZE_EXPAND_FILL
+		cost_spin.custom_minimum_size = Vector2(65, 0)
+		cost_spin.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		cost_spin.tooltip_text = "Base cost"
 		cost_spin.value = int(entry.get("cost", 0))
 		cost_spin.value_changed.connect(func(v: float):
 			if _updating: return
 			_update_cost_entry(id, cur_name, "cost", int(v)))
-		row2.add_child(cost_spin)
-
-		var inc_lbl := Label.new()
-		inc_lbl.text = "Inc"
-		inc_lbl.add_theme_font_size_override("font_size", 10)
-		row2.add_child(inc_lbl)
+		row.add_child(cost_spin)
 
 		var inc_spin := SpinBox.new()
 		inc_spin.min_value = 0
 		inc_spin.max_value = 99999
 		inc_spin.step = 1
-		inc_spin.size_flags_horizontal = SIZE_EXPAND_FILL
+		inc_spin.custom_minimum_size = Vector2(65, 0)
+		inc_spin.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		inc_spin.tooltip_text = "Cost increase per purchase"
 		inc_spin.value = int(entry.get("cost_increase", 0))
 		inc_spin.value_changed.connect(func(v: float):
 			if _updating: return
 			_update_cost_entry(id, cur_name, "cost_increase", int(v)))
-		row2.add_child(inc_spin)
+		row.add_child(inc_spin)
 
 		var exp_check := CheckButton.new()
 		exp_check.text = "Exp"
 		exp_check.add_theme_font_size_override("font_size", 10)
+		exp_check.tooltip_text = "Exponential cost scaling"
 		exp_check.button_pressed = bool(entry.get("exponential", false))
 		exp_check.toggled.connect(func(v: bool):
 			if _updating: return
 			_update_cost_entry(id, cur_name, "exponential", v))
-		row2.add_child(exp_check)
+		row.add_child(exp_check)
 
-		entry_vbox.add_child(row2)
-		_costs_vbox.add_child(entry_vbox)
+		var remove_btn := Button.new()
+		remove_btn.tooltip_text = "Remove %s cost" % display_name
+		remove_btn.custom_minimum_size = Vector2(28, 28)
+		remove_btn.size_flags_horizontal = SIZE_SHRINK_END
+		remove_btn.pressed.connect(_remove_cost_entry.bind(id, cur_name))
+		_style_red_btn(remove_btn)
+		row.add_child(remove_btn)
+
+		_costs_vbox.add_child(row)
 
 		_cost_spinboxes[cur_name] = {
 			"cost_spin": cost_spin,
 			"inc_spin":  inc_spin,
 			"exp_check": exp_check,
 		}
-
-	if costs.size() > 0:
-		_costs_vbox.add_child(HSeparator.new())
 
 
 func _refresh_costs_add_opt(d: Dictionary) -> void:
