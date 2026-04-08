@@ -62,8 +62,8 @@ var last_saved_data: Dictionary = {}
 
 # ── Tree data ────────────────────────────────────────────────────────────
 
-## id → { name, cost, cost_increase, exponential, max, description, effect,
-##         value, position:Vector2, emoticon, image,
+## id → { name, costs:Array[{currency,cost,cost_increase,exponential}], max,
+##         description, effect, value, position:Vector2, emoticon, image,
 ##         unlocks_on_purchase, unlocks_on_max, has_rank_up_child,
 ##         group, purchased, secondary_unlock }
 var nodes: Dictionary = {}
@@ -83,6 +83,9 @@ var custom_groups: Array = []
 
 ## Array of secondary unlock name strings, e.g. ["NONE", "A", "B", ...]
 var custom_secondary_unlocks: PackedStringArray = []
+
+## Array of { name:String (UPPER_SNAKE_CASE), color:Color, icon:String }
+var custom_currencies: Array = []
 
 
 func _init() -> void:
@@ -123,6 +126,10 @@ func _load_defaults() -> void:
 			"CUSTOM_1", "CUSTOM_2", "CUSTOM_3", "CUSTOM_4", "CUSTOM_5"]), "color": Color(0.62, 0.62, 0.62)},
 	]
 	custom_secondary_unlocks = PackedStringArray(["NONE"])
+	custom_currencies = [
+		{"name": "GOLD",    "color": Color(0.92, 0.78, 0.32), "icon": "\U0001FA99"},
+		{"name": "DIAMOND", "color": Color(0.40, 0.60, 0.92), "icon": "\U0001F48E"},
+	]
 
 
 # ── Node helpers ─────────────────────────────────────────────────────────
@@ -511,6 +518,104 @@ func rename_secondary_unlock(old_name: String, new_name: String) -> void:
 	data_changed.emit()
 
 
+# ── Currency helpers ────────────────────────────────────────────────────
+
+func snake_to_title(s: String) -> String:
+	## "SKILL_POINTS" → "Skill Points"
+	var words: PackedStringArray = s.split("_")
+	var out: PackedStringArray = PackedStringArray()
+	for w in words:
+		if w.length() > 0:
+			out.append(w.capitalize())
+	return " ".join(out)
+
+
+func add_currency(name: String, color: Color = Color.TRANSPARENT, icon: String = "") -> void:
+	for cur in custom_currencies:
+		if cur["name"] == name:
+			return
+	custom_currencies.append({"name": name, "color": color, "icon": icon})
+	data_changed.emit()
+
+
+func remove_currency(name: String) -> void:
+	for i in range(custom_currencies.size()):
+		if custom_currencies[i]["name"] == name:
+			custom_currencies.remove_at(i)
+			# Cascade: remove cost entry from all nodes
+			for nid in nodes:
+				var costs: Array = nodes[nid].get("costs", [])
+				var filtered: Array = []
+				for entry in costs:
+					if entry.get("currency", "") != name:
+						filtered.append(entry)
+				nodes[nid]["costs"] = filtered
+			data_changed.emit()
+			return
+
+
+func rename_currency(old_name: String, new_name: String) -> void:
+	if old_name == new_name or new_name == "":
+		return
+	for cur in custom_currencies:
+		if cur["name"] == new_name:
+			return  # reject duplicate
+	for cur in custom_currencies:
+		if cur["name"] == old_name:
+			cur["name"] = new_name
+			# Cascade: update currency key in all node cost entries
+			for nid in nodes:
+				var costs: Array = nodes[nid].get("costs", [])
+				for entry in costs:
+					if entry.get("currency", "") == old_name:
+						entry["currency"] = new_name
+			data_changed.emit()
+			return
+
+
+func get_currency_color(name: String) -> Color:
+	for cur in custom_currencies:
+		if cur["name"] == name:
+			var c = cur.get("color", Color.TRANSPARENT)
+			if c is Color:
+				return c as Color
+			return Color.TRANSPARENT
+	return Color.TRANSPARENT
+
+
+func set_currency_color(name: String, color: Color) -> void:
+	for cur in custom_currencies:
+		if cur["name"] == name:
+			cur["color"] = color
+			data_changed.emit()
+			return
+
+
+func get_currency_icon(name: String) -> String:
+	for cur in custom_currencies:
+		if cur["name"] == name:
+			return str(cur.get("icon", ""))
+	return ""
+
+
+func set_currency_icon(name: String, icon: String) -> void:
+	for cur in custom_currencies:
+		if cur["name"] == name:
+			cur["icon"] = icon
+			data_changed.emit()
+			return
+
+
+func count_nodes_with_currency(name: String) -> int:
+	var count := 0
+	for nid in nodes:
+		for entry in nodes[nid].get("costs", []):
+			if entry.get("currency", "") == name:
+				count += 1
+				break
+	return count
+
+
 # ── Serialisation ────────────────────────────────────────────────────────
 
 func to_dict() -> Dictionary:
@@ -518,11 +623,17 @@ func to_dict() -> Dictionary:
 	for id in nodes:
 		var n: Dictionary = nodes[id]
 		var pos: Vector2 = n.get("position", Vector2.ZERO)
+		var costs_arr: Array = []
+		for entry in n.get("costs", []):
+			costs_arr.append({
+				"currency":      entry.get("currency", ""),
+				"cost":          entry.get("cost", 0),
+				"cost_increase": entry.get("cost_increase", 0),
+				"exponential":   entry.get("exponential", false),
+			})
 		nd[id] = {
 			"name":                n.get("name", ""),
-			"cost":                n.get("cost", 0),
-			"cost_increase":       n.get("cost_increase", 0),
-			"exponential":         n.get("exponential", false),
+			"costs":               costs_arr,
 			"max":                 n.get("max", 1),
 			"description":         n.get("description", ""),
 			"effect":              n.get("effect", "NONE"),
@@ -556,6 +667,15 @@ func to_dict() -> Dictionary:
 	for s in custom_secondary_unlocks:
 		sec_arr.append(s)
 
+	var currencies_arr := []
+	for cur in custom_currencies:
+		var cc: Color = cur.get("color", Color.TRANSPARENT)
+		currencies_arr.append({
+			"name":  cur["name"],
+			"color": cc.to_html(false),
+			"icon":  cur.get("icon", ""),
+		})
+
 	return {
 		"nodes": nd,
 		"connections": ca,
@@ -563,6 +683,7 @@ func to_dict() -> Dictionary:
 		"effects": effects_arr,
 		"groups": groups_arr,
 		"secondary_unlocks": sec_arr,
+		"currencies": currencies_arr,
 	}
 
 
@@ -602,6 +723,17 @@ func from_dict(data: Dictionary) -> void:
 		for s in data["secondary_unlocks"]:
 			custom_secondary_unlocks.append(str(s))
 
+	if data.has("currencies") and data["currencies"] is Array and data["currencies"].size() > 0:
+		custom_currencies = []
+		for cur in data["currencies"]:
+			var clr_str: String = str(cur.get("color", ""))
+			var clr: Color = Color.html(clr_str) if clr_str.length() >= 6 else Color.TRANSPARENT
+			custom_currencies.append({
+				"name":  str(cur.get("name", "")),
+				"color": clr,
+				"icon":  str(cur.get("icon", "")),
+			})
+
 	if data.has("nodes"):
 		for id in data["nodes"]:
 			var n: Dictionary = data["nodes"][id]
@@ -611,11 +743,19 @@ func from_dict(data: Dictionary) -> void:
 			var grp := str(n.get("group", ""))
 			if legacy_group_map.has(grp):
 				grp = legacy_group_map[grp]
+			var node_costs: Array = []
+			var raw_costs = n.get("costs", [])
+			if raw_costs is Array:
+				for entry in raw_costs:
+					node_costs.append({
+						"currency":      str(entry.get("currency", "")),
+						"cost":          int(entry.get("cost", 0)),
+						"cost_increase": int(entry.get("cost_increase", 0)),
+						"exponential":   bool(entry.get("exponential", false)),
+					})
 			nodes[id] = {
 				"name":                str(n.get("name", "")),
-				"cost":                int(n.get("cost", 0)),
-				"cost_increase":       int(n.get("cost_increase", 0)),
-				"exponential":         bool(n.get("exponential", false)),
+				"costs":               node_costs,
 				"max":                 int(n.get("max", 1)),
 				"description":         str(n.get("description", "")),
 				"effect":              str(n.get("effect", "NONE")),

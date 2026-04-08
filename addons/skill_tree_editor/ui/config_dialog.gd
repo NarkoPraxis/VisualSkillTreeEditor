@@ -42,13 +42,26 @@ var _grp_effects_opt: OptionButton
 var _grp_assign_btn: Button
 var _grp_unassign_btn: Button
 
+# ── Currencies tab refs ─────────────────────────────────────────────────
+var _cur_scroll: ScrollContainer
+var _cur_list_vbox: VBoxContainer
+var _cur_selected_name: String = ""
+var _cur_row_btns: Dictionary = {}
+var _cur_color_pickers: Dictionary = {}
+var _cur_icon_edits: Dictionary = {}
+var _cur_name_field: LineEdit
+var _cur_add_btn: Button
+var _cur_rename_btn: Button
+var _cur_remove_btn: Button
+var _cur_confirm_dlg: ConfirmationDialog
+
 
 func setup(ctx: RefCounted) -> void:
 	_ctx = ctx
 
 
 func _ready() -> void:
-	title = "Configure Effects & Groups"
+	title = "Visual Skill Tree Editor Settings"
 	min_size = Vector2i(560, 520)
 	_build_ui()
 	get_ok_button().hide()
@@ -64,6 +77,7 @@ func _build_ui() -> void:
 	_tabs.add_tab("Effects")
 	_tabs.add_tab("Groups")
 	_tabs.add_tab("Secondary Unlocks")
+	_tabs.add_tab("Currencies")
 	_tabs.tab_changed.connect(_on_tab_changed)
 	root.add_child(_tabs)
 
@@ -81,6 +95,11 @@ func _build_ui() -> void:
 	root.add_child(sec_page)
 	_pages.append(sec_page)
 
+	var cur_page := _build_currencies_page()
+	cur_page.visible = false
+	root.add_child(cur_page)
+	_pages.append(cur_page)
+
 	add_child(root)
 
 
@@ -96,6 +115,9 @@ func _on_tab_changed(idx: int) -> void:
 	elif idx == 2:
 		_refresh_secondary()
 		_sec_field.call_deferred("grab_focus")
+	elif idx == 3:
+		_refresh_currencies()
+		_cur_name_field.call_deferred("grab_focus")
 
 
 var _start_tab: int = 0
@@ -841,3 +863,202 @@ func _move_sec_selection(delta: int) -> void:
 	_sec_list.select(idx)
 	_sec_list.ensure_current_is_visible()
 	_update_sec_buttons(true)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# CURRENCIES TAB
+# ═══════════════════════════════════════════════════════════════════════
+
+func _build_currencies_page() -> VBoxContainer:
+	var vbox := VBoxContainer.new()
+	vbox.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	vbox.add_theme_constant_override("separation", 6)
+
+	_cur_scroll = ScrollContainer.new()
+	_cur_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_cur_scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_cur_scroll.custom_minimum_size = Vector2(0, 200)
+	_cur_list_vbox = VBoxContainer.new()
+	_cur_list_vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_cur_list_vbox.add_theme_constant_override("separation", 2)
+	_cur_scroll.add_child(_cur_list_vbox)
+	vbox.add_child(_cur_scroll)
+	vbox.add_child(_spacer_v(4))
+
+	var add_row := HBoxContainer.new()
+	add_row.add_theme_constant_override("separation", 4)
+	_cur_add_btn = Button.new()
+	_cur_add_btn.tooltip_text = "Add new currency (Enter)"
+	_cur_add_btn.pressed.connect(_do_cur_add)
+	_setup_plus_btn(_cur_add_btn)
+	add_row.add_child(_cur_add_btn)
+	_cur_name_field = LineEdit.new()
+	_cur_name_field.placeholder_text = "CURRENCY_NAME"
+	_cur_name_field.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_cur_name_field.tooltip_text = "Currency name (auto-converted to UPPER_SNAKE_CASE)"
+	_cur_name_field.gui_input.connect(_on_cur_field_input)
+	add_row.add_child(_cur_name_field)
+	_cur_rename_btn = Button.new()
+	_cur_rename_btn.text = "Replace"
+	_cur_rename_btn.tooltip_text = "Replace selected currency name with the text in the field (F2)"
+	_cur_rename_btn.pressed.connect(_do_cur_rename)
+	_cur_rename_btn.disabled = true
+	add_row.add_child(_cur_rename_btn)
+	_cur_remove_btn = Button.new()
+	_cur_remove_btn.tooltip_text = "Remove selected currency (Del)"
+	_cur_remove_btn.pressed.connect(_do_cur_remove)
+	_cur_remove_btn.disabled = true
+	_setup_remove_btn(_cur_remove_btn)
+	add_row.add_child(_cur_remove_btn)
+	vbox.add_child(add_row)
+
+	return vbox
+
+
+func _refresh_currencies() -> void:
+	var prev_name: String = _cur_selected_name
+	_cur_selected_name = ""
+	_cur_row_btns.clear()
+	_cur_color_pickers.clear()
+	_cur_icon_edits.clear()
+	while _cur_list_vbox.get_child_count() > 0:
+		var child := _cur_list_vbox.get_child(0)
+		_cur_list_vbox.remove_child(child)
+		child.queue_free()
+
+	for cur in _ctx.custom_currencies:
+		var cname: String = cur["name"]
+		var clr: Color = _ctx.get_currency_color(cname)
+		var icon: String = _ctx.get_currency_icon(cname)
+		var row := _build_cur_row(cname, clr, icon)
+		_cur_list_vbox.add_child(row)
+
+	if prev_name != "" and _cur_row_btns.has(prev_name):
+		_select_cur_by_name(prev_name)
+	else:
+		var has_sel := _cur_selected_name != ""
+		_cur_rename_btn.disabled = not has_sel
+		_cur_remove_btn.disabled = not has_sel
+
+
+func _build_cur_row(cname: String, color: Color, icon: String) -> HBoxContainer:
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 4)
+	row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+
+	var btn := Button.new()
+	btn.text = _ctx.snake_to_title(cname)
+	btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	btn.pressed.connect(func(): _select_cur_by_name(cname))
+	btn.gui_input.connect(func(ev: InputEvent): _on_cur_row_input(ev, cname))
+	_style_grp_btn(btn, _cur_selected_name == cname)
+	row.add_child(btn)
+	_cur_row_btns[cname] = btn
+
+	var icon_edit := LineEdit.new()
+	icon_edit.text = icon
+	icon_edit.placeholder_text = "emoji or res:// path"
+	icon_edit.custom_minimum_size = Vector2(110, 0)
+	icon_edit.tooltip_text = "Icon: emoji/symbol or image path (res://)"
+	icon_edit.text_changed.connect(func(t: String): _ctx.set_currency_icon(cname, t))
+	row.add_child(icon_edit)
+	_cur_icon_edits[cname] = icon_edit
+
+	var cpb := ColorPickerButton.new()
+	cpb.color = color
+	cpb.custom_minimum_size = Vector2(64, 28)
+	cpb.tooltip_text = "Currency rarity color (used for cost text)"
+	cpb.color_changed.connect(func(c: Color): _ctx.set_currency_color(cname, c))
+	row.add_child(cpb)
+	_cur_color_pickers[cname] = cpb
+
+	return row
+
+
+func _select_cur_by_name(cname: String) -> void:
+	if _cur_selected_name != "" and _cur_row_btns.has(_cur_selected_name):
+		_style_grp_btn(_cur_row_btns[_cur_selected_name] as Button, false)
+	_cur_selected_name = cname
+	if cname != "" and _cur_row_btns.has(cname):
+		_style_grp_btn(_cur_row_btns[cname] as Button, true)
+	_cur_rename_btn.disabled = cname == ""
+	_cur_remove_btn.disabled = cname == ""
+
+
+func _do_cur_add() -> void:
+	var cname := _sanitize(_cur_name_field.text)
+	if cname == "":
+		return
+	_ctx.add_currency(cname)
+	_cur_name_field.clear()
+	_refresh_currencies()
+	_select_cur_by_name(cname)
+	_cur_name_field.grab_focus()
+
+
+func _do_cur_rename() -> void:
+	if _cur_selected_name == "":
+		return
+	var old_name: String = _cur_selected_name
+	var new_name := _sanitize(_cur_name_field.text)
+	if new_name == "" or new_name == old_name:
+		return
+	_ctx.rename_currency(old_name, new_name)
+	_cur_name_field.clear()
+	_refresh_currencies()
+	_select_cur_by_name(new_name)
+	_cur_name_field.grab_focus()
+
+
+func _do_cur_remove() -> void:
+	var cname: String = _cur_selected_name
+	if cname == "":
+		return
+	var count: int = _ctx.count_nodes_with_currency(cname)
+	if count > 0:
+		if not _cur_confirm_dlg or not is_instance_valid(_cur_confirm_dlg):
+			_cur_confirm_dlg = ConfirmationDialog.new()
+			_cur_confirm_dlg.confirmed.connect(_on_cur_remove_confirmed)
+			add_child(_cur_confirm_dlg)
+		_cur_confirm_dlg.dialog_text = "Remove currency \"%s\"?\nIt is used by %d node%s and will be removed from them." % [
+			_ctx.snake_to_title(cname), count, "s" if count != 1 else ""]
+		_cur_confirm_dlg.popup_centered()
+	else:
+		_ctx.remove_currency(cname)
+		_cur_selected_name = ""
+		_refresh_currencies()
+
+
+func _on_cur_remove_confirmed() -> void:
+	var cname: String = _cur_selected_name
+	if cname == "":
+		return
+	_ctx.remove_currency(cname)
+	_cur_selected_name = ""
+	_refresh_currencies()
+
+
+func _on_cur_field_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
+			_do_cur_add()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			_do_cur_rename()
+			get_viewport().set_input_as_handled()
+
+
+func _on_cur_row_input(event: InputEvent, cname: String) -> void:
+	if event is InputEventKey and event.pressed:
+		if _cur_selected_name != cname:
+			return
+		if event.keycode == KEY_DELETE:
+			_do_cur_remove()
+			get_viewport().set_input_as_handled()
+		elif event.keycode == KEY_F2:
+			_cur_name_field.text = cname
+			_cur_name_field.grab_focus()
+			_cur_name_field.select_all()
+			get_viewport().set_input_as_handled()

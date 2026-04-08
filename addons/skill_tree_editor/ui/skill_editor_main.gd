@@ -76,7 +76,7 @@ var _file_dlg_mode: String = ""
 var _empty_lbl: Label
 var _drag_hover: bool = false
 
-## id → { panel, style, name_lbl, cost_lbl, max_lbl, emote_lbl }
+## id → { panel, style, name_lbl, costs_vbox, emote_lbl, icon_tex, count_spin, badge_panel, badge_lbl, badge_sty }
 var _cards: Dictionary = {}
 
 var _bold_font: Font = null  # set in _ready() from editor theme
@@ -503,13 +503,11 @@ func _create_card(id: String) -> void:
 	stats.add_theme_constant_override("separation", 6)
 	vb.add_child(stats)
 
-	var clbl := Label.new()
-	clbl.text = _cost_text(d)
-	clbl.add_theme_font_size_override("font_size", 11)
-	clbl.add_theme_color_override("font_color", Color(0.92, 0.88, 0.35))
-	clbl.mouse_filter = MOUSE_FILTER_IGNORE
-	clbl.size_flags_horizontal = SIZE_EXPAND_FILL
-	stats.add_child(clbl)
+	var costs_vbox := VBoxContainer.new()
+	costs_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	costs_vbox.mouse_filter = MOUSE_FILTER_IGNORE
+	costs_vbox.add_theme_constant_override("separation", 1)
+	stats.add_child(costs_vbox)
 
 	var purchased: int = d.get("purchased", 0)
 	var max_val: int   = d.get("max", 1)
@@ -534,7 +532,7 @@ func _create_card(id: String) -> void:
 	le.add_theme_constant_override("minimum_character_width", 1)
 	_cards[id] = {
 		"panel": panel, "style": sty,
-		"name_lbl": nlbl, "cost_lbl": clbl, "emote_lbl": emote, "icon_tex": icon_tex,
+		"name_lbl": nlbl, "costs_vbox": costs_vbox, "emote_lbl": emote, "icon_tex": icon_tex,
 		"count_spin": spin,
 		"badge_panel": badge_panel, "badge_lbl": badge_lbl, "badge_sty": badge_sty,
 	}
@@ -551,7 +549,7 @@ func _refresh_card(id: String) -> void:
 		return
 	panel.position = _w2s(d["position"])
 	c["name_lbl"].text = d["name"]
-	c["cost_lbl"].text = _cost_text(d)
+	_rebuild_card_costs(d, c["costs_vbox"] as VBoxContainer)
 	var em: String = d.get("emoticon", "")
 	_apply_icon(em, c["emote_lbl"], c["icon_tex"])
 	var sec: String = d.get("secondary_unlock", "")
@@ -1244,15 +1242,66 @@ func _on_purchase_spinbox_changed(new_value: float, id: String) -> void:
 	_ctx.set_purchased(id, int(new_value))
 
 
-func _cost_text(d: Dictionary) -> String:
-	var base: int  = d.get("cost", 0)
-	var inc: int   = d.get("cost_increase", 0)
-	var expo: bool = d.get("exponential", false)
+func _fmt_cost(entry: Dictionary) -> String:
+	var base: int  = entry.get("cost", 0)
+	var inc: int   = entry.get("cost_increase", 0)
+	var expo: bool = entry.get("exponential", false)
 	if inc == 0:
-		return "$%d" % base
+		return "%d" % base
 	if expo:
-		return "$%d%s" % [base, _to_superscript(inc)]
-	return "$%d +%d" % [base, inc]
+		return "%d%s" % [base, _to_superscript(inc)]
+	return "%d +%d" % [base, inc]
+
+
+func _rebuild_card_costs(d: Dictionary, costs_vbox: VBoxContainer) -> void:
+	## Clears and rebuilds the per-currency cost rows on a node card.
+	while costs_vbox.get_child_count() > 0:
+		var ch := costs_vbox.get_child(0)
+		costs_vbox.remove_child(ch)
+		ch.queue_free()
+
+	for entry in d.get("costs", []):
+		var cur_name: String = entry.get("currency", "")
+		var clr: Color = _ctx.get_currency_color(cur_name)
+		var icon_val: String = _ctx.get_currency_icon(cur_name)
+
+		var row := HBoxContainer.new()
+		row.mouse_filter = MOUSE_FILTER_IGNORE
+		row.add_theme_constant_override("separation", 2)
+
+		if icon_val != "":
+			if _is_image_path(icon_val):
+				var itex := TextureRect.new()
+				itex.custom_minimum_size = Vector2(14, 14)
+				itex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+				itex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+				itex.mouse_filter = MOUSE_FILTER_IGNORE
+				itex.size_flags_vertical = SIZE_SHRINK_CENTER
+				var tex: Texture2D = null
+				if icon_val.begins_with("res://") and ResourceLoader.exists(icon_val):
+					tex = load(icon_val)
+				elif FileAccess.file_exists(icon_val):
+					var img := Image.new()
+					if img.load(icon_val) == OK:
+						tex = ImageTexture.create_from_image(img)
+				itex.texture = tex
+				row.add_child(itex)
+			else:
+				var elbl := Label.new()
+				elbl.text = icon_val
+				elbl.add_theme_font_size_override("font_size", 11)
+				elbl.mouse_filter = MOUSE_FILTER_IGNORE
+				elbl.size_flags_vertical = SIZE_SHRINK_CENTER
+				row.add_child(elbl)
+
+		var clbl := Label.new()
+		clbl.text = _fmt_cost(entry)
+		clbl.add_theme_font_size_override("font_size", 11)
+		clbl.add_theme_color_override("font_color", clr)
+		clbl.mouse_filter = MOUSE_FILTER_IGNORE
+		row.add_child(clbl)
+
+		costs_vbox.add_child(row)
 
 
 func _to_superscript(n: int) -> String:
@@ -1280,8 +1329,7 @@ func _show_empty() -> void:
 
 func _blank(pos: Vector2) -> Dictionary:
 	return {
-		"name": "New Skill", "cost": 100, "cost_increase": 0,
-		"exponential": false, "max": 1, "description": "",
+		"name": "New Skill", "costs": [], "max": 1, "description": "",
 		"effect": "NONE", "value": 0.0, "position": pos,
 		"emoticon": "", "image": "",
 		"unlocks_on_purchase": 0, "unlocks_on_max": 0, "has_rank_up_child": false,
@@ -1291,11 +1339,13 @@ func _blank(pos: Vector2) -> Dictionary:
 
 func _rank_up_child_template(parent_id: String, wp: Vector2) -> Dictionary:
 	var p: Dictionary = _ctx.nodes[parent_id]
+	var parent_costs_raw = p.get("costs", [])
+	var parent_costs: Array = []
+	if parent_costs_raw is Array:
+		parent_costs = (parent_costs_raw as Array).duplicate(true)
 	return {
 		"name": p.get("name", "New Skill") + " I",
-		"cost": p.get("cost", 100),
-		"cost_increase": p.get("cost_increase", 0),
-		"exponential": p.get("exponential", false),
+		"costs": parent_costs,
 		"max": p.get("max", 1),
 		"description": p.get("description", ""),
 		"effect": p.get("effect", "NONE"),

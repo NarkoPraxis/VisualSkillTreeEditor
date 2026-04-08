@@ -14,9 +14,10 @@ var _config_dlg: AcceptDialog
 
 # ── Field refs ───────────────────────────────────────────────────────────
 var _name_edit: LineEdit
-var _cost_spin: SpinBox
-var _cost_inc_spin: SpinBox
-var _exp_check: CheckButton
+var _costs_vbox: VBoxContainer
+var _costs_add_opt: OptionButton
+var _costs_add_btn: Button
+var _cost_spinboxes: Dictionary = {}  # currency_name → {cost_spin, inc_spin, exp_check}
 var _max_spin: SpinBox
 var _value_spin: SpinBox
 var _effect_opt: OptionButton
@@ -79,25 +80,35 @@ func _build_ui() -> void:
 	_name_edit = _le("Name")
 	_name_edit.text_changed.connect(func(t: String): _set_prop("name", t))
 
-	_cost_spin = _sb("Cost", 0, 99999, 1)
-	_cost_spin.value_changed.connect(func(v: float): _set_prop("cost", int(v)))
+	# Costs section header
+	var costs_hdr := HBoxContainer.new()
+	costs_hdr.add_theme_constant_override("separation", 4)
+	var costs_lbl := Label.new()
+	costs_lbl.text = "Costs"
+	costs_lbl.add_theme_font_size_override("font_size", 11)
+	costs_lbl.custom_minimum_size = Vector2(LABEL_W, 0)
+	costs_hdr.add_child(costs_lbl)
+	_fields.add_child(costs_hdr)
 
-	# Increase + Exponential toggle on the same row
-	var inc_row := HBoxContainer.new()
-	inc_row.add_theme_constant_override("separation", 4)
-	inc_row.add_child(_inline_lbl("Increase"))
-	_cost_inc_spin = SpinBox.new()
-	_cost_inc_spin.min_value = 0
-	_cost_inc_spin.max_value = 99999
-	_cost_inc_spin.step = 1
-	_cost_inc_spin.size_flags_horizontal = SIZE_EXPAND_FILL
-	_cost_inc_spin.value_changed.connect(func(v: float): _set_prop("cost_increase", int(v)))
-	inc_row.add_child(_cost_inc_spin)
-	_exp_check = CheckButton.new()
-	_exp_check.text = "Exponential"
-	_exp_check.toggled.connect(func(v: bool): _set_prop("exponential", v))
-	inc_row.add_child(_exp_check)
-	_fields.add_child(inc_row)
+	# Per-currency cost rows (rebuilt on selection)
+	_costs_vbox = VBoxContainer.new()
+	_costs_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+	_costs_vbox.add_theme_constant_override("separation", 4)
+	_fields.add_child(_costs_vbox)
+
+	# Add currency row
+	var add_row := HBoxContainer.new()
+	add_row.add_theme_constant_override("separation", 4)
+	_costs_add_opt = OptionButton.new()
+	_costs_add_opt.size_flags_horizontal = SIZE_EXPAND_FILL
+	_costs_add_opt.tooltip_text = "Select a currency to add"
+	add_row.add_child(_costs_add_opt)
+	_costs_add_btn = Button.new()
+	_costs_add_btn.text = "+ Add"
+	_costs_add_btn.tooltip_text = "Add this currency cost to the skill"
+	_costs_add_btn.pressed.connect(_do_add_currency_cost)
+	add_row.add_child(_costs_add_btn)
+	_fields.add_child(add_row)
 
 	_max_spin = _sb("Max Purchases", 1, 99, 1)
 	_max_spin.value_changed.connect(func(v: float): _set_prop("max", int(v)))
@@ -304,17 +315,7 @@ func _populate(id: String) -> void:
 	if _name_edit.text != name_val:
 		_name_edit.text = name_val
 
-	var cost_val := int(d.get("cost", 0))
-	if int(_cost_spin.value) != cost_val:
-		_cost_spin.value = cost_val
-
-	var cost_inc_val := int(d.get("cost_increase", 0))
-	if int(_cost_inc_spin.value) != cost_inc_val:
-		_cost_inc_spin.value = cost_inc_val
-
-	var exp_val: bool = d.get("exponential", false)
-	if _exp_check.button_pressed != exp_val:
-		_exp_check.button_pressed = exp_val
+	_refresh_costs_ui(id, d)
 
 	var max_val := int(d.get("max", 1))
 	if int(_max_spin.value) != max_val:
@@ -436,11 +437,13 @@ func _on_restore() -> void:
 	# Keep current canvas position
 	var pos: Vector2 = _ctx.nodes[id].get("position", Vector2.ZERO)
 	var pa = saved.get("position", [pos.x, pos.y])
+	var raw_saved_costs = saved.get("costs", [])
+	var saved_costs: Array = []
+	if raw_saved_costs is Array:
+		saved_costs = (raw_saved_costs as Array).duplicate(true)
 	_ctx.nodes[id] = {
 		"name":                str(saved.get("name", "")),
-		"cost":                int(saved.get("cost", 0)),
-		"cost_increase":       int(saved.get("cost_increase", 0)),
-		"exponential":         bool(saved.get("exponential", false)),
+		"costs":               saved_costs,
 		"max":                 int(saved.get("max", 1)),
 		"description":         str(saved.get("description", "")),
 		"effect":              str(saved.get("effect", "NONE")),
@@ -458,3 +461,181 @@ func _on_restore() -> void:
 	# Recompute unlock counts from current connections (counts are derived, not stored)
 	_ctx._update_unlock_counts()
 	_ctx.data_changed.emit()
+
+
+# ── Multi-currency cost section ──────────────────────────────────────────
+
+func _refresh_costs_ui(id: String, d: Dictionary) -> void:
+	## Called during _populate(). Smart refresh: only rebuilds widgets when
+	## the set of currencies in the node changes; otherwise updates values in-place.
+	var node_cur_names: Array = []
+	for entry in d.get("costs", []):
+		node_cur_names.append(entry.get("currency", ""))
+
+	var displayed_names: Array = _cost_spinboxes.keys()
+	if node_cur_names != displayed_names:
+		_rebuild_costs_ui(id, d)
+	else:
+		# Update values in-place (preserves widget focus)
+		for entry in d.get("costs", []):
+			var cur_name: String = entry.get("currency", "")
+			if not _cost_spinboxes.has(cur_name):
+				continue
+			var refs: Dictionary = _cost_spinboxes[cur_name]
+			var cost_val: int = int(entry.get("cost", 0))
+			if int((refs["cost_spin"] as SpinBox).value) != cost_val:
+				(refs["cost_spin"] as SpinBox).value = cost_val
+			var inc_val: int = int(entry.get("cost_increase", 0))
+			if int((refs["inc_spin"] as SpinBox).value) != inc_val:
+				(refs["inc_spin"] as SpinBox).value = inc_val
+			var exp_val: bool = entry.get("exponential", false)
+			if (refs["exp_check"] as CheckButton).button_pressed != exp_val:
+				(refs["exp_check"] as CheckButton).button_pressed = exp_val
+
+	# Always refresh the add dropdown (currencies may have been added/removed globally)
+	_refresh_costs_add_opt(d)
+
+
+func _rebuild_costs_ui(id: String, d: Dictionary) -> void:
+	## Clears and rebuilds the per-currency cost rows in _costs_vbox.
+	_cost_spinboxes.clear()
+	while _costs_vbox.get_child_count() > 0:
+		var child := _costs_vbox.get_child(0)
+		_costs_vbox.remove_child(child)
+		child.queue_free()
+
+	var costs: Array = d.get("costs", [])
+	for entry in costs:
+		var cur_name: String = entry.get("currency", "")
+		var clr: Color = _ctx.get_currency_color(cur_name)
+		var display_name: String = _ctx.snake_to_title(cur_name)
+
+		var entry_vbox := VBoxContainer.new()
+		entry_vbox.add_theme_constant_override("separation", 2)
+		entry_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
+
+		# Row 1: currency name label + remove button
+		var row1 := HBoxContainer.new()
+		row1.add_theme_constant_override("separation", 4)
+		var name_lbl := Label.new()
+		name_lbl.text = display_name
+		name_lbl.add_theme_font_size_override("font_size", 11)
+		name_lbl.add_theme_color_override("font_color", clr)
+		name_lbl.size_flags_horizontal = SIZE_EXPAND_FILL
+		row1.add_child(name_lbl)
+		var remove_btn := Button.new()
+		remove_btn.text = "\u00d7"
+		remove_btn.tooltip_text = "Remove %s cost from this skill" % display_name
+		remove_btn.custom_minimum_size = Vector2(GUTTER_W, 0)
+		remove_btn.pressed.connect(_remove_cost_entry.bind(id, cur_name))
+		row1.add_child(remove_btn)
+		entry_vbox.add_child(row1)
+
+		# Row 2: Cost spinbox + Increase spinbox + Exponential checkbox
+		var row2 := HBoxContainer.new()
+		row2.add_theme_constant_override("separation", 4)
+
+		var cost_lbl := Label.new()
+		cost_lbl.text = "Cost"
+		cost_lbl.add_theme_font_size_override("font_size", 10)
+		row2.add_child(cost_lbl)
+
+		var cost_spin := SpinBox.new()
+		cost_spin.min_value = 0
+		cost_spin.max_value = 99999
+		cost_spin.step = 1
+		cost_spin.size_flags_horizontal = SIZE_EXPAND_FILL
+		cost_spin.value = int(entry.get("cost", 0))
+		cost_spin.value_changed.connect(func(v: float):
+			if _updating: return
+			_update_cost_entry(id, cur_name, "cost", int(v)))
+		row2.add_child(cost_spin)
+
+		var inc_lbl := Label.new()
+		inc_lbl.text = "Inc"
+		inc_lbl.add_theme_font_size_override("font_size", 10)
+		row2.add_child(inc_lbl)
+
+		var inc_spin := SpinBox.new()
+		inc_spin.min_value = 0
+		inc_spin.max_value = 99999
+		inc_spin.step = 1
+		inc_spin.size_flags_horizontal = SIZE_EXPAND_FILL
+		inc_spin.value = int(entry.get("cost_increase", 0))
+		inc_spin.value_changed.connect(func(v: float):
+			if _updating: return
+			_update_cost_entry(id, cur_name, "cost_increase", int(v)))
+		row2.add_child(inc_spin)
+
+		var exp_check := CheckButton.new()
+		exp_check.text = "Exp"
+		exp_check.add_theme_font_size_override("font_size", 10)
+		exp_check.button_pressed = bool(entry.get("exponential", false))
+		exp_check.toggled.connect(func(v: bool):
+			if _updating: return
+			_update_cost_entry(id, cur_name, "exponential", v))
+		row2.add_child(exp_check)
+
+		entry_vbox.add_child(row2)
+		_costs_vbox.add_child(entry_vbox)
+
+		_cost_spinboxes[cur_name] = {
+			"cost_spin": cost_spin,
+			"inc_spin":  inc_spin,
+			"exp_check": exp_check,
+		}
+
+	if costs.size() > 0:
+		_costs_vbox.add_child(HSeparator.new())
+
+
+func _refresh_costs_add_opt(d: Dictionary) -> void:
+	var already: Array = []
+	for entry in d.get("costs", []):
+		already.append(entry.get("currency", ""))
+	_costs_add_opt.clear()
+	for cur in _ctx.custom_currencies:
+		var cname: String = cur["name"]
+		if not already.has(cname):
+			_costs_add_opt.add_item(_ctx.snake_to_title(cname))
+			_costs_add_opt.set_item_metadata(_costs_add_opt.item_count - 1, cname)
+	_costs_add_btn.disabled = _costs_add_opt.item_count == 0
+
+
+func _do_add_currency_cost() -> void:
+	var id: String = _ctx.selected_skill_id
+	if id == "" or _costs_add_opt.item_count == 0:
+		return
+	var cur_name: String = str(_costs_add_opt.get_item_metadata(_costs_add_opt.selected))
+	var d: Dictionary = _ctx.nodes[id]
+	var raw = d.get("costs", [])
+	var costs: Array = []
+	if raw is Array:
+		costs = (raw as Array).duplicate(true)
+	costs.append({"currency": cur_name, "cost": 0, "cost_increase": 0, "exponential": false})
+	_ctx.update_node(id, "costs", costs)
+
+
+func _update_cost_entry(id: String, cur_name: String, field: String, value: Variant) -> void:
+	if id == "" or not _ctx.nodes.has(id):
+		return
+	var raw = _ctx.nodes[id].get("costs", [])
+	var costs: Array = []
+	if raw is Array:
+		costs = (raw as Array).duplicate(true)
+	for entry in costs:
+		if entry.get("currency", "") == cur_name:
+			entry[field] = value
+			break
+	_ctx.update_node(id, "costs", costs)
+
+
+func _remove_cost_entry(id: String, cur_name: String) -> void:
+	if id == "" or not _ctx.nodes.has(id):
+		return
+	var costs: Array = _ctx.nodes[id].get("costs", [])
+	var filtered: Array = []
+	for entry in costs:
+		if entry.get("currency", "") != cur_name:
+			filtered.append(entry)
+	_ctx.update_node(id, "costs", filtered)
