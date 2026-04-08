@@ -10,10 +10,13 @@
 ##   • Connect skill_purchased(id, data) to deduct currency / apply effects.
 ##   • Call save_state() / load_state() for session persistence.
 ##   • Call reset_all() to zero every purchased count.
+##   • Call set_available_currency(amount) to enable gold gating + HUD label.
+##   • Connect currency_spent(amount) to deduct from your gold and re-sync.
 ##
 ## Canvas architecture:
 ##   SkillTree (Control, full-rect anchor)
 ##     SkillNode children  (unlocked nodes only, visible when available)
+##     SkillCurrencyHud    (PanelContainer, z=10)  ← top-left gold display
 ##     _tooltip  (PanelContainer, z=10)  ← hover description
 @tool
 extends Control
@@ -21,6 +24,7 @@ class_name SkillTree
 
 const SkillNodeScript       = preload("res://addons/skill_tree_editor/runtime/skill_node.gd")
 const SkillTreeDataScript   = preload("res://addons/skill_tree_editor/runtime/skill_tree_data.gd")
+const SkillCurrencyHudScene = preload("res://addons/skill_tree_editor/runtime/skill_currency_hud.tscn")
 
 # ── Constants ─────────────────────────────────────────────────────────────
 
@@ -40,6 +44,9 @@ const CANVAS_BG := Color(0.06, 0.09, 0.16)
 ## Click in the Inspector to create SkillNode children from skill_config.
 @export_tool_button("Generate Tree") var _gen_btn: Callable = _generate
 
+## Gold Available for Debugging purposes
+@export var starting_currency: int = 10000
+
 ## Initial camera offset saved by Generate — do not edit manually.
 @export var _initial_cam_off: Vector2 = Vector2.ZERO
 ## Initial camera zoom saved by Generate — do not edit manually.
@@ -50,6 +57,10 @@ const CANVAS_BG := Color(0.06, 0.09, 0.16)
 ## Emitted after a skill is successfully purchased.
 ## skill_data is a snapshot of the node dictionary at the moment of purchase.
 signal skill_purchased(skill_id: String, skill_data: Dictionary)
+
+## Emitted after a skill purchase succeeds and currency has been deducted.
+## Connect this to update your game's gold variable.
+signal currency_spent(amount: int)
 
 # ── Camera state ──────────────────────────────────────────────────────────
 
@@ -70,11 +81,55 @@ var _pan_start_mouse: Vector2 = Vector2.ZERO
 var _pan_start_off: Vector2 = Vector2.ZERO
 var _hovered_id: String = ""
 
+var available_currency: int = -1  ## initialized to starting_currency in _load_and_wire()
+var _hud: SkillCurrencyHud        ## null until _generate() runs
+
 
 # ── Lifecycle ─────────────────────────────────────────────────────────────
 
+const LINE_COLOR_DEFAULT := Color(1.0, 1.0, 1.0, 0.50)
+const LINE_COLOR_MAXED   := Color(1.0, 0.78, 0.18, 0.85)
+const LINE_WIDTH         := 2.0
+
+
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), CANVAS_BG, true)
+	if _data == null:
+		return
+	var half: Vector2 = Vector2(NODE_W, NODE_H) * _cam_zoom * 0.5
+	for c in (_data as SkillTreeData).connections:
+		var from_id: String = c["from"]
+		var to_id: String   = c["to"]
+		# At runtime, skip lines whose child card is hidden (dependency unmet).
+		if not Engine.is_editor_hint():
+			var to_card = _cards.get(to_id)
+			if to_card == null or not (to_card as Node).visible:
+				continue
+		# Prefer the card's live screen position so editor moves are reflected
+		# immediately.  Fall back to world-position → screen transform for cards
+		# that haven't been placed yet.
+		var from_sc: Vector2
+		var to_sc: Vector2
+		var from_card: Control = _cards.get(from_id) as Control
+		if from_card != null and is_instance_valid(from_card):
+			from_sc = from_card.position + half
+		elif _world_positions.has(from_id):
+			from_sc = _w2s(_world_positions[from_id]) + half
+		elif (_data as SkillTreeData).nodes.has(from_id):
+			from_sc = _w2s((_data as SkillTreeData).nodes[from_id]["position"] as Vector2) + half
+		else:
+			continue
+		var to_card: Control = _cards.get(to_id) as Control
+		if to_card != null and is_instance_valid(to_card):
+			to_sc = to_card.position + half
+		elif _world_positions.has(to_id):
+			to_sc = _w2s(_world_positions[to_id]) + half
+		elif (_data as SkillTreeData).nodes.has(to_id):
+			to_sc = _w2s((_data as SkillTreeData).nodes[to_id]["position"] as Vector2) + half
+		else:
+			continue
+		var parent_maxed: bool = (_data as SkillTreeData).is_maxed(from_id)
+		draw_line(from_sc, to_sc, LINE_COLOR_MAXED if parent_maxed else LINE_COLOR_DEFAULT, LINE_WIDTH, true)
 
 
 func _ready() -> void:
@@ -94,11 +149,18 @@ func _ready() -> void:
 				var id: String = str(child.get_meta("skill_node_id"))
 				_cards[id] = child
 		_update_all_card_transforms()
+		set_process(true)
 	else:
 		if skill_config.is_empty():
 			_show_placeholder("Set 'skill_config' in the Inspector, then click Generate Tree.")
 		else:
 			_load_and_wire()
+
+
+func _process(_delta: float) -> void:
+	# In the editor only: redraw every frame so connection lines follow nodes
+	# as they are dragged around the canvas.
+	queue_redraw()
 
 
 func _load_and_wire() -> void:
@@ -143,6 +205,14 @@ func _load_and_wire() -> void:
 	if _cards.is_empty():
 		push_warning("SkillTree: no pre-generated nodes found. Open the scene in the editor and click 'Generate Tree' in the Inspector.")
 
+	# Find the HUD child saved by _generate()
+	for child in get_children():
+		if child.has_meta("currency_hud"):
+			_hud = child as SkillCurrencyHud
+			break
+
+	available_currency = starting_currency
+	_update_hud()
 	_update_all_card_transforms()
 	_refresh_all_nodes()
 
@@ -170,17 +240,24 @@ func _generate() -> void:
 		return
 	_data = data
 
-	_spawn_nodes()
+	var root: Node = null
+	if is_inside_tree():
+		root = get_tree().edited_scene_root
+
+	# Clear existing HUD if regenerating
+	for child in get_children():
+		if child.has_meta("currency_hud"):
+			child.free()
+
+	_spawn_nodes(root)
+	_spawn_hud(root)
 	call_deferred("_fit_and_save_cam")
 	print("SkillTree: generated %d nodes from '%s'." % [(data as SkillTreeData).nodes.size(), skill_config])
 
 
-func _spawn_nodes() -> void:
+func _spawn_nodes(root: Node) -> void:
 	## Creates one SkillNode child per entry in _data.nodes (editor only).
 	## Nodes are assigned to the scene root so they are saved with the scene.
-	var root: Node = null
-	if is_inside_tree():
-		root = get_tree().edited_scene_root
 	for id in (_data as SkillTreeData).nodes:
 		var node_data: Dictionary = (_data as SkillTreeData).nodes[id]
 		var sn: SkillNode = SkillNodeScript.new() as SkillNode
@@ -193,6 +270,17 @@ func _spawn_nodes() -> void:
 		sn.setup(id, node_data)
 		_world_positions[id] = node_data["position"] as Vector2
 		_cards[id] = sn
+
+
+func _spawn_hud(root: Node) -> void:
+	## Creates the SkillCurrencyHud child (editor only).
+	## Saved to the scene root so it persists alongside SkillNodes.
+	var hud: SkillCurrencyHud = SkillCurrencyHudScene.instantiate() as SkillCurrencyHud
+	hud.set_meta("currency_hud", true)
+	add_child(hud)
+	if root != null:
+		hud.owner = root
+	_hud = hud
 
 
 # ── Canvas construction ───────────────────────────────────────────────────
@@ -289,6 +377,7 @@ func _update_all_card_transforms() -> void:
 			continue
 		sn.position = _w2s(world_pos)
 		sn.scale = Vector2(_cam_zoom, _cam_zoom)
+	queue_redraw()
 
 
 func _fit_view() -> void:
@@ -369,13 +458,27 @@ func _on_buy_pressed(id: String) -> void:
 		return
 	if not (_data as SkillTreeData).can_purchase(id):
 		return
+	var cost: int = (_data as SkillTreeData).get_current_cost(id)
+	if available_currency >= 0 and available_currency < cost:
+		return   # silent block — insufficient gold
 	var current: int = (_data as SkillTreeData).nodes[id].get("purchased", 0)
 	(_data as SkillTreeData).set_purchased(id, current + 1)
+	if available_currency >= 0:
+		available_currency -= cost
+		_update_hud()
+		currency_spent.emit(cost)
 	skill_purchased.emit(id, (_data as SkillTreeData).nodes[id].duplicate())
+
+
+func _update_hud() -> void:
+	if not is_instance_valid(_hud):
+		return
+	_hud.set_gold(available_currency)
 
 
 func _on_data_state_changed() -> void:
 	_refresh_all_nodes()
+	queue_redraw()
 
 
 func _refresh_all_nodes() -> void:
@@ -423,7 +526,7 @@ func _on_node_hovered(id: String) -> void:
 	var effect: String = node.get("effect", "NONE")
 	if effect != "NONE" and effect != "":
 		var val: float = node.get("value", 0.0)
-		lines.append("Effect: %s  +%.4g" % [effect, val])
+		lines.append("Effect: %s  +%s" % [effect, str(val)])
 
 	var up: int = node.get("unlocks_on_purchase", 0)
 	var um: int = node.get("unlocks_on_max", 0)
@@ -485,6 +588,17 @@ func _on_node_unhovered(_id: String) -> void:
 
 
 # ── Public API ────────────────────────────────────────────────────────────
+
+func set_available_currency(amount: int) -> void:
+	## Enables gold gating and syncs the HUD label.
+	## Pass -1 to disable gating (HUD hides). Call again whenever your gold changes.
+	##
+	## Example:
+	##   skill_tree.set_available_currency(gold)
+	##   skill_tree.currency_spent.connect(func(amt): gold -= amt; skill_tree.set_available_currency(gold))
+	available_currency = amount
+	_update_hud()
+
 
 func save_state() -> Dictionary:
 	## Returns {node_id: purchased_count} for all nodes.

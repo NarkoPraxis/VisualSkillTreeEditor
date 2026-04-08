@@ -183,16 +183,13 @@ func get_current_cost(id: String) -> int:
 
 func set_purchased(id: String, count: int) -> void:
 	## Sets the purchased count for a node, clamped to [0, max].
-	## Propagates upward (ensures ancestors meet their thresholds) and
-	## cascades zeroes downward when requirements are no longer met.
+	## Cascades zeroes downward when requirements are no longer met.
 	if not nodes.has(id):
 		return
 	var max_val: int = nodes[id].get("max", 1)
 	var old_count: int = nodes[id].get("purchased", 0)
 	var new_count: int = clampi(count, 0, max_val)
 	nodes[id]["purchased"] = new_count
-	if new_count >= 1:
-		_ensure_ancestors_purchased(id)
 	if new_count < old_count:
 		if old_count >= max_val and new_count < max_val:
 			for c in connections:
@@ -203,21 +200,6 @@ func set_purchased(id: String, count: int) -> void:
 				if c["from"] == id and c["type"] == "purchased":
 					_zero_subtree(c["to"], {})
 	state_changed.emit()
-
-
-func _ensure_ancestors_purchased(id: String) -> void:
-	for c in connections:
-		if c["to"] != id:
-			continue
-		var parent_id: String = c["from"]
-		if not nodes.has(parent_id):
-			continue
-		var parent_max: int = nodes[parent_id].get("max", 1)
-		var needed: int = parent_max if (c["type"] == "maxed" or c["type"] == "rank_up") else 1
-		var current: int = nodes[parent_id].get("purchased", 0)
-		if current < needed:
-			nodes[parent_id]["purchased"] = needed
-			_ensure_ancestors_purchased(parent_id)
 
 
 func _zero_subtree(id: String, visited: Dictionary) -> void:

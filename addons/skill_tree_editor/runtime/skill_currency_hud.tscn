@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://o1gy3sjl1di5"]
+
+[ext_resource type="Script" uid="uid://coafaja1m0rx5" path="res://addons/skill_tree_editor/runtime/skill_currency_hud.gd" id="1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4w8yf"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.06, 0.09, 0.16, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.55, 0.8, 0.55)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="SkillCurrencyHud" type="PanelContainer" unique_id=530261144]
+z_index = 10
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 9.0
+offset_bottom = 31.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_4w8yf")
+script = ExtResource("1")
+
+[node name="GoldLabel" type="Label" parent="." unique_id=3298651]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 13

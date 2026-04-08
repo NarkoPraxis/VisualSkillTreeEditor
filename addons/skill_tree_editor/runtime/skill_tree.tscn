@@ -2,6 +2,23 @@
 
 [ext_resource type="Script" uid="uid://1l8clwugwvgk" path="res://addons/skill_tree_editor/runtime/skill_tree.gd" id="1_stgd"]
 [ext_resource type="Script" uid="uid://bsmm8sqdx8ulh" path="res://addons/skill_tree_editor/runtime/skill_node.gd" id="2_qaik4"]
+[ext_resource type="PackedScene" uid="uid://o1gy3sjl1di5" path="res://addons/skill_tree_editor/runtime/skill_currency_hud.tscn" id="3_sud2e"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a4o5g"]
+content_margin_left = 10.0
+content_margin_top = 6.0
+content_margin_right = 10.0
+content_margin_bottom = 6.0
+bg_color = Color(0.06, 0.09, 0.16, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.55, 0.8, 0.55)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
 
 [node name="SkillTree" type="Control" unique_id=1012355133]
 clip_contents = true
@@ -9,6 +26,10 @@ layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 63.0
+offset_top = -15.0
+offset_right = 63.0
+offset_bottom = -15.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_stgd")
@@ -16,7 +37,7 @@ skill_config = "res://addons/skill_tree_editor/example_skill_tree.json"
 _initial_cam_off = Vector2(538.2847, 190.34267)
 _initial_cam_zoom = 0.3137495447258552
 
-[node name="node_1" type="Control" parent="." unique_id=1439945019]
+[node name="node_1" type="Control" parent="." unique_id=1046076768]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 587.96173
@@ -47,7 +68,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_1"
 
-[node name="node_10" type="Control" parent="." unique_id=2102920772]
+[node name="node_10" type="Control" parent="." unique_id=545682367]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 300.8809
@@ -78,13 +99,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_10"
 
-[node name="node_11" type="Control" parent="." unique_id=1149000335]
+[node name="node_11" type="Control" parent="." unique_id=1312522793]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 660.0
-offset_top = 145.0
-offset_right = 840.0
-offset_bottom = 227.0
+offset_left = 647.0
+offset_top = 168.0
+offset_right = 827.0
+offset_bottom = 250.0
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_11"
@@ -109,7 +130,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_11"
 
-[node name="node_12" type="Control" parent="." unique_id=1027604259]
+[node name="node_12" type="Control" parent="." unique_id=1498238929]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 756.8636
@@ -140,7 +161,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_12"
 
-[node name="node_13" type="Control" parent="." unique_id=1774307830]
+[node name="node_13" type="Control" parent="." unique_id=1132324268]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 822.2281
@@ -171,13 +192,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_13"
 
-[node name="node_14" type="Control" parent="." unique_id=157033715]
+[node name="node_14" type="Control" parent="." unique_id=703123277]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 723.397
-offset_top = 437.42044
-offset_right = 903.397
-offset_bottom = 519.4204
+offset_left = 666.0
+offset_top = 288.0
+offset_right = 846.0
+offset_bottom = 370.0
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_14"
@@ -202,13 +223,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_14"
 
-[node name="node_15" type="Control" parent="." unique_id=1118846485]
+[node name="node_15" type="Control" parent="." unique_id=1714292481]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 728.3646
-offset_top = 493.11096
-offset_right = 908.3646
-offset_bottom = 575.11096
+offset_left = 670.96765
+offset_top = 343.69052
+offset_right = 850.96765
+offset_bottom = 425.69052
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_15"
@@ -233,13 +254,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_15"
 
-[node name="node_16" type="Control" parent="." unique_id=1627362002]
+[node name="node_16" type="Control" parent="." unique_id=1780437746]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 728.6261
-offset_top = 548.0172
-offset_right = 908.6261
-offset_bottom = 630.0172
+offset_left = 671.2291
+offset_top = 398.59677
+offset_right = 851.2291
+offset_bottom = 480.59677
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_16"
@@ -264,13 +285,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_16"
 
-[node name="node_17" type="Control" parent="." unique_id=717586972]
+[node name="node_17" type="Control" parent="." unique_id=1307761365]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 666.00006
-offset_top = 77.00001
-offset_right = 846.00006
-offset_bottom = 159.0
+offset_left = 725.0864
+offset_top = 94.48816
+offset_right = 905.0864
+offset_bottom = 176.48816
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_17"
@@ -295,7 +316,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_17"
 
-[node name="node_18" type="Control" parent="." unique_id=271065271]
+[node name="node_18" type="Control" parent="." unique_id=89230495]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 867.0681
@@ -326,7 +347,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_18"
 
-[node name="node_19" type="Control" parent="." unique_id=449731723]
+[node name="node_19" type="Control" parent="." unique_id=238339121]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 945.5055
@@ -357,13 +378,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_19"
 
-[node name="node_2" type="Control" parent="." unique_id=980776460]
+[node name="node_2" type="Control" parent="." unique_id=404495663]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 391.34537
-offset_top = 276.62378
-offset_right = 571.34534
-offset_bottom = 358.62378
+offset_left = 410.7665
+offset_top = 244.0
+offset_right = 590.7665
+offset_bottom = 326.0
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_2"
@@ -388,7 +409,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_2"
 
-[node name="node_20" type="Control" parent="." unique_id=1509050873]
+[node name="node_20" type="Control" parent="." unique_id=1331399065]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 1031.5251
@@ -419,13 +440,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_20"
 
-[node name="node_21" type="Control" parent="." unique_id=1893725099]
+[node name="node_21" type="Control" parent="." unique_id=328738655]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 738.0
-offset_top = 95.0
-offset_right = 918.0
-offset_bottom = 177.0
+offset_left = 774.51196
+offset_top = 252.56966
+offset_right = 954.51196
+offset_bottom = 334.56964
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_21"
@@ -450,7 +471,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_21"
 
-[node name="node_22" type="Control" parent="." unique_id=750635797]
+[node name="node_22" type="Control" parent="." unique_id=148514624]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 851.90356
@@ -481,7 +502,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_22"
 
-[node name="node_23" type="Control" parent="." unique_id=1188579314]
+[node name="node_23" type="Control" parent="." unique_id=1599296895]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 929.29517
@@ -512,7 +533,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_23"
 
-[node name="node_24" type="Control" parent="." unique_id=1206853581]
+[node name="node_24" type="Control" parent="." unique_id=563085004]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 983.5476
@@ -543,13 +564,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_24"
 
-[node name="node_25" type="Control" parent="." unique_id=1755432915]
+[node name="node_25" type="Control" parent="." unique_id=1103166725]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 591.0
-offset_top = 137.0
-offset_right = 771.0
-offset_bottom = 219.0
+offset_left = 566.0
+offset_top = 174.0
+offset_right = 746.0
+offset_bottom = 256.0
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_25"
@@ -574,13 +595,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_25"
 
-[node name="node_26" type="Control" parent="." unique_id=977034713]
+[node name="node_26" type="Control" parent="." unique_id=953807309]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 475.53482
-offset_top = 347.21744
-offset_right = 655.5348
-offset_bottom = 429.21744
+offset_left = 498.0
+offset_top = 251.00003
+offset_right = 678.0
+offset_bottom = 333.00003
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_26"
@@ -605,13 +626,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_26"
 
-[node name="node_27" type="Control" parent="." unique_id=689351380]
+[node name="node_27" type="Control" parent="." unique_id=1151716063]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 475.53482
-offset_top = 409.96735
-offset_right = 655.5348
-offset_bottom = 491.96735
+offset_left = 490.0
+offset_top = 322.00003
+offset_right = 670.0
+offset_bottom = 404.00003
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_27"
@@ -636,13 +657,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_27"
 
-[node name="node_28" type="Control" parent="." unique_id=767906856]
+[node name="node_28" type="Control" parent="." unique_id=1184184816]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 601.03467
-offset_top = 347.21744
-offset_right = 781.03467
-offset_bottom = 429.21744
+offset_left = 590.0
+offset_top = 246.00003
+offset_right = 770.0
+offset_bottom = 328.00003
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_28"
@@ -667,7 +688,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_28"
 
-[node name="node_29" type="Control" parent="." unique_id=151886011]
+[node name="node_29" type="Control" parent="." unique_id=2053747263]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 601.03467
@@ -698,13 +719,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_29"
 
-[node name="node_3" type="Control" parent="." unique_id=1492776167]
+[node name="node_3" type="Control" parent="." unique_id=205150183]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 312.38507
-offset_top = 357.15283
-offset_right = 492.38507
-offset_bottom = 439.15283
+offset_left = 331.8062
+offset_top = 324.52905
+offset_right = 511.8062
+offset_bottom = 406.52905
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_3"
@@ -729,7 +750,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_3"
 
-[node name="node_30" type="Control" parent="." unique_id=1409451499]
+[node name="node_30" type="Control" parent="." unique_id=38197579]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 601.03467
@@ -760,13 +781,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_30"
 
-[node name="node_4" type="Control" parent="." unique_id=275327728]
+[node name="node_4" type="Control" parent="." unique_id=2040452033]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 282.57886
-offset_top = 411.53607
-offset_right = 462.57886
-offset_bottom = 493.53607
+offset_left = 302.0
+offset_top = 378.9123
+offset_right = 482.0
+offset_bottom = 460.9123
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_4"
@@ -791,13 +812,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_4"
 
-[node name="node_5" type="Control" parent="." unique_id=562810479]
+[node name="node_5" type="Control" parent="." unique_id=1141409923]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 402.8495
-offset_top = 328.5232
-offset_right = 582.8495
-offset_bottom = 410.5232
+offset_left = 422.27063
+offset_top = 295.8994
+offset_right = 602.2706
+offset_bottom = 377.8994
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_5"
@@ -822,13 +843,13 @@ _node_data = {
 }
 metadata/skill_node_id = "node_5"
 
-[node name="node_6" type="Control" parent="." unique_id=1158192700]
+[node name="node_6" type="Control" parent="." unique_id=1643082493]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
-offset_left = 522.0
-offset_top = 105.0
-offset_right = 702.0
-offset_bottom = 187.0
+offset_left = 295.65173
+offset_top = 233.22177
+offset_right = 475.65173
+offset_bottom = 315.22177
 scale = Vector2(0.31374955, 0.31374955)
 script = ExtResource("2_qaik4")
 _node_id = "node_6"
@@ -853,7 +874,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_6"
 
-[node name="node_7" type="Control" parent="." unique_id=538708648]
+[node name="node_7" type="Control" parent="." unique_id=2048925385]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 221.9206
@@ -884,7 +905,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_7"
 
-[node name="node_8" type="Control" parent="." unique_id=1629902400]
+[node name="node_8" type="Control" parent="." unique_id=1866457793]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 152.89566
@@ -915,7 +936,7 @@ _node_data = {
 }
 metadata/skill_node_id = "node_8"
 
-[node name="node_9" type="Control" parent="." unique_id=1483970922]
+[node name="node_9" type="Control" parent="." unique_id=988529673]
 custom_minimum_size = Vector2(180, 82)
 anchors_preset = 0
 offset_left = 64.0
@@ -945,3 +966,10 @@ _node_data = {
 "value": 2.0
 }
 metadata/skill_node_id = "node_9"
+
+[node name="SkillCurrencyHud" parent="." unique_id=530261144 instance=ExtResource("3_sud2e")]
+layout_mode = 0
+offset_right = 29.0
+offset_bottom = 38.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_a4o5g")
+metadata/currency_hud = true
