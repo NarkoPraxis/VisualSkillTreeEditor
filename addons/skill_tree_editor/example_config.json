@@ -76,6 +76,33 @@
 			"type": "purchased"
 		}
 	],
+	"currencies": [
+		{
+			"color": "ebc752",
+			"icon": "🪙",
+			"name": "GOLD"
+		},
+		{
+			"color": "6699eb",
+			"icon": "💎",
+			"name": "DIAMOND"
+		},
+		{
+			"color": "ffffff",
+			"icon": "",
+			"name": "TEST"
+		},
+		{
+			"color": "ffffff",
+			"icon": "",
+			"name": "TESTTEST"
+		},
+		{
+			"color": "ffffff",
+			"icon": "",
+			"name": "TESTASD"
+		}
+	],
 	"effects": [
 		"NONE",
 		"DAMAGE",
@@ -223,12 +250,17 @@
 	"next_id": 22,
 	"nodes": {
 		"node_1": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "ICE_DAMAGE",
 			"emoticon": "😉",
-			"exponential": false,
 			"group": "PASSIVE",
 			"image": "",
 			"max": 1,
@@ -244,12 +276,17 @@
 			"value": 0.0
 		},
 		"node_10": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -265,12 +302,17 @@
 			"value": 0.0
 		},
 		"node_11": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -286,12 +328,17 @@
 			"value": 0.0
 		},
 		"node_12": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -307,12 +354,17 @@
 			"value": 0.0
 		},
 		"node_13": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -328,12 +380,17 @@
 			"value": 0.0
 		},
 		"node_14": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -349,12 +406,17 @@
 			"value": 0.0
 		},
 		"node_15": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -370,12 +432,17 @@
 			"value": 0.0
 		},
 		"node_16": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -391,12 +458,17 @@
 			"value": 0.0
 		},
 		"node_17": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -412,12 +484,17 @@
 			"value": 0.0
 		},
 		"node_18": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -433,12 +510,17 @@
 			"value": 0.0
 		},
 		"node_19": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -454,12 +536,17 @@
 			"value": 0.0
 		},
 		"node_2": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "JUMP_HEIGHT",
 			"emoticon": "😉",
-			"exponential": false,
 			"group": "UTILITY",
 			"image": "",
 			"max": 1,
@@ -475,12 +562,17 @@
 			"value": 0.0
 		},
 		"node_20": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -496,12 +588,17 @@
 			"value": 0.0
 		},
 		"node_21": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -517,12 +614,17 @@
 			"value": 0.0
 		},
 		"node_22": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -538,12 +640,17 @@
 			"value": 0.0
 		},
 		"node_3": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "✈️",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -559,19 +666,30 @@
 			"value": 0.0
 		},
 		"node_4": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				},
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "DIAMOND",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "ITEM_FIND",
 			"emoticon": "🤩",
-			"exponential": false,
 			"group": "UTILITY",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				746.75,
-				71.0
+				717.166687011719,
+				54.4722137451172
 			],
 			"purchased": 0,
 			"secondary_unlock": "A",
@@ -580,19 +698,24 @@
 			"value": 0.0
 		},
 		"node_5": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
 			"name": "New Skill",
 			"position": [
-				752.75,
-				236.25
+				731.5,
+				405.0
 			],
 			"purchased": 0,
 			"secondary_unlock": "",
@@ -601,12 +724,17 @@
 			"value": 0.0
 		},
 		"node_6": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -622,12 +750,17 @@
 			"value": 0.0
 		},
 		"node_7": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -643,12 +776,17 @@
 			"value": 0.0
 		},
 		"node_8": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,
@@ -664,12 +802,17 @@
 			"value": 0.0
 		},
 		"node_9": {
-			"cost": 100,
-			"cost_increase": 0,
+			"costs": [
+				{
+					"cost": 0,
+					"cost_increase": 0,
+					"currency": "GOLD",
+					"exponential": false
+				}
+			],
 			"description": "",
 			"effect": "NONE",
 			"emoticon": "",
-			"exponential": false,
 			"group": "",
 			"image": "",
 			"max": 1,

@@ -134,6 +134,15 @@ func _load_defaults() -> void:
 
 # ── Node helpers ─────────────────────────────────────────────────────────
 
+func default_costs() -> Array:
+	## Returns a single-entry costs array using the first configured currency,
+	## or an empty array if no currencies are defined.
+	if custom_currencies.is_empty():
+		return []
+	var first: Dictionary = custom_currencies[0]
+	return [{"currency": first["name"], "cost": 0, "cost_increase": 0, "exponential": false}]
+
+
 func generate_id() -> String:
 	_next_id += 1
 	return "node_%d" % _next_id
@@ -753,6 +762,8 @@ func from_dict(data: Dictionary) -> void:
 						"cost_increase": int(entry.get("cost_increase", 0)),
 						"exponential":   bool(entry.get("exponential", false)),
 					})
+			if node_costs.is_empty() and not custom_currencies.is_empty():
+				node_costs = default_costs()
 			nodes[id] = {
 				"name":                str(n.get("name", "")),
 				"costs":               node_costs,

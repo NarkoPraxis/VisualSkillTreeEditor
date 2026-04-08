@@ -511,6 +511,7 @@ func _create_card(id: String) -> void:
 	spin.step = 1
 	spin.suffix = "/ %d" % max_val
 	spin.custom_minimum_size = Vector2(86, 0)
+	spin.size_flags_vertical = SIZE_SHRINK_CENTER
 	spin.add_theme_font_size_override("font_size", 11)
 	spin.add_theme_constant_override("buttons_width", 16)
 	spin.add_theme_constant_override("field_and_buttons_separator", 2)
@@ -542,6 +543,7 @@ func _refresh_card(id: String) -> void:
 	panel.position = _w2s(d["position"])
 	c["name_lbl"].text = d["name"]
 	_rebuild_card_costs(d, c["costs_vbox"] as VBoxContainer)
+	panel.reset_size()
 	var em: String = d.get("emoticon", "")
 	_apply_icon(em, c["emote_lbl"], c["icon_tex"])
 	var sec: String = d.get("secondary_unlock", "")
@@ -1261,36 +1263,34 @@ func _rebuild_card_costs(d: Dictionary, costs_vbox: VBoxContainer) -> void:
 		row.mouse_filter = MOUSE_FILTER_IGNORE
 		row.add_theme_constant_override("separation", 2)
 
-		if icon_val != "":
-			if _is_image_path(icon_val):
-				var itex := TextureRect.new()
-				itex.custom_minimum_size = Vector2(14, 14)
-				itex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-				itex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-				itex.mouse_filter = MOUSE_FILTER_IGNORE
-				itex.size_flags_vertical = SIZE_SHRINK_CENTER
-				var tex: Texture2D = null
-				if icon_val.begins_with("res://") and ResourceLoader.exists(icon_val):
-					tex = load(icon_val)
-				elif FileAccess.file_exists(icon_val):
-					var img := Image.new()
-					if img.load(icon_val) == OK:
-						tex = ImageTexture.create_from_image(img)
-				itex.texture = tex
-				row.add_child(itex)
-			else:
-				var elbl := Label.new()
-				elbl.text = icon_val
-				elbl.add_theme_font_size_override("font_size", 11)
-				elbl.mouse_filter = MOUSE_FILTER_IGNORE
-				elbl.size_flags_vertical = SIZE_SHRINK_CENTER
-				row.add_child(elbl)
+		if icon_val != "" and _is_image_path(icon_val):
+			# Image icon: TextureRect beside the cost label
+			var itex := TextureRect.new()
+			itex.custom_minimum_size = Vector2(14, 14)
+			itex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			itex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			itex.mouse_filter = MOUSE_FILTER_IGNORE
+			itex.size_flags_vertical = SIZE_SHRINK_CENTER
+			itex.size_flags_horizontal = SIZE_SHRINK_BEGIN
+			var tex: Texture2D = null
+			if icon_val.begins_with("res://") and ResourceLoader.exists(icon_val):
+				tex = load(icon_val)
+			elif FileAccess.file_exists(icon_val):
+				var img := Image.new()
+				if img.load(icon_val) == OK:
+					tex = ImageTexture.create_from_image(img)
+			itex.texture = tex
+			row.add_child(itex)
 
+		# Emoji icon + cost number in one label — avoids inter-widget gaps from
+		# font advance width being wider than the visible glyph.
+		var prefix: String = (icon_val + " ") if (icon_val != "" and not _is_image_path(icon_val)) else ""
 		var clbl := Label.new()
-		clbl.text = _fmt_cost(entry)
+		clbl.text = prefix + _fmt_cost(entry)
 		clbl.add_theme_font_size_override("font_size", 11)
 		clbl.add_theme_color_override("font_color", clr)
 		clbl.mouse_filter = MOUSE_FILTER_IGNORE
+		clbl.size_flags_horizontal = SIZE_SHRINK_BEGIN
 		row.add_child(clbl)
 
 		costs_vbox.add_child(row)
@@ -1321,7 +1321,7 @@ func _show_empty() -> void:
 
 func _blank(pos: Vector2) -> Dictionary:
 	return {
-		"name": "New Skill", "costs": [], "max": 1, "description": "",
+		"name": "New Skill", "costs": _ctx.default_costs(), "max": 1, "description": "",
 		"effect": "NONE", "value": 0.0, "position": pos,
 		"emoticon": "", "image": "",
 		"unlocks_on_purchase": 0, "unlocks_on_max": 0, "has_rank_up_child": false,

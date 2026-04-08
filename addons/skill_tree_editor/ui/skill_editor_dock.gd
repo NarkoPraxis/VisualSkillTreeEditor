@@ -32,6 +32,9 @@ var _placeholder: Label
 var _scroll: ScrollContainer
 var _fields: VBoxContainer
 
+var _config_last_tab: int = 0
+var _costs_add_row: HBoxContainer
+
 
 func setup(ctx: RefCounted) -> void:
 	_ctx = ctx
@@ -48,13 +51,6 @@ func _ready() -> void:
 # ── UI construction ──────────────────────────────────────────────────────
 
 func _build_ui() -> void:
-	# Title
-	var title := Label.new()
-	title.text = "Skill Properties"
-	title.add_theme_font_size_override("font_size", 14)
-	add_child(title)
-	add_child(HSeparator.new())
-
 	# Placeholder
 	_placeholder = Label.new()
 	_placeholder.text = "Select a node to edit\nits properties here."
@@ -77,28 +73,42 @@ func _build_ui() -> void:
 	_scroll.add_child(_fields)
 
 	# --- Fields ---
-	_name_edit = _le("Name")
+	# Name row: label + input + settings gear (inline)
+	var name_row := HBoxContainer.new()
+	name_row.add_theme_constant_override("separation", 4)
+	name_row.add_child(_inline_lbl("Name"))
+	_name_edit = LineEdit.new()
+	_name_edit.size_flags_horizontal = SIZE_EXPAND_FILL
+	name_row.add_child(_name_edit)
+	var cfg_gear := Button.new()
+	cfg_gear.text = "\u2699"
+	cfg_gear.tooltip_text = "Configure effects, groups, secondary unlocks & currencies"
+	cfg_gear.custom_minimum_size = Vector2(GUTTER_W, 0)
+	cfg_gear.pressed.connect(_open_config)
+	name_row.add_child(cfg_gear)
+	_fields.add_child(name_row)
 	_name_edit.text_changed.connect(func(t: String): _set_prop("name", t))
-
-	# Add currency row (above the per-currency rows)
-	var add_row := HBoxContainer.new()
-	add_row.add_theme_constant_override("separation", 4)
-	_costs_add_opt = OptionButton.new()
-	_costs_add_opt.size_flags_horizontal = SIZE_EXPAND_FILL
-	_costs_add_opt.tooltip_text = "Select a currency to add"
-	add_row.add_child(_costs_add_opt)
-	_costs_add_btn = Button.new()
-	_costs_add_btn.text = "+ Add"
-	_costs_add_btn.tooltip_text = "Add this currency cost to the skill"
-	_costs_add_btn.pressed.connect(_do_add_currency_cost)
-	add_row.add_child(_costs_add_btn)
-	_fields.add_child(add_row)
 
 	# Per-currency cost rows (rebuilt on selection)
 	_costs_vbox = VBoxContainer.new()
 	_costs_vbox.size_flags_horizontal = SIZE_EXPAND_FILL
 	_costs_vbox.add_theme_constant_override("separation", 3)
 	_fields.add_child(_costs_vbox)
+
+	# Add-currency row (below the per-currency rows; hidden when all currencies are added)
+	_costs_add_row = HBoxContainer.new()
+	_costs_add_row.add_theme_constant_override("separation", 4)
+	_costs_add_row.add_child(_inline_lbl(""))  # empty spacer to align dropdown with other inputs
+	_costs_add_opt = OptionButton.new()
+	_costs_add_opt.size_flags_horizontal = SIZE_EXPAND_FILL
+	_costs_add_opt.tooltip_text = "Select a currency to add"
+	_costs_add_row.add_child(_costs_add_opt)
+	_costs_add_btn = Button.new()
+	_costs_add_btn.tooltip_text = "Add this currency cost to the skill"
+	_costs_add_btn.pressed.connect(_do_add_currency_cost)
+	_style_green_btn(_costs_add_btn)
+	_costs_add_row.add_child(_costs_add_btn)
+	_fields.add_child(_costs_add_row)
 
 	_max_spin = _sb("Max Purchases", 1, 99, 1)
 	_max_spin.value_changed.connect(func(v: float): _set_prop("max", int(v)))
@@ -110,12 +120,7 @@ func _build_ui() -> void:
 	_effect_opt = OptionButton.new()
 	_effect_opt.size_flags_horizontal = SIZE_EXPAND_FILL
 	eff_row.add_child(_effect_opt)
-	var gear := Button.new()
-	gear.text = "\u2699"
-	gear.tooltip_text = "Configure effects & groups"
-	gear.custom_minimum_size = Vector2(GUTTER_W, 0)
-	gear.pressed.connect(_open_config)
-	eff_row.add_child(gear)
+	eff_row.add_child(_gutter())
 	_fields.add_child(eff_row)
 
 	_populate_effect_dropdown()
@@ -158,12 +163,7 @@ func _build_ui() -> void:
 	_secondary_opt = OptionButton.new()
 	_secondary_opt.size_flags_horizontal = SIZE_EXPAND_FILL
 	sec_row.add_child(_secondary_opt)
-	var sec_gear := Button.new()
-	sec_gear.text = "\u2699"
-	sec_gear.tooltip_text = "Configure secondary unlocks"
-	sec_gear.custom_minimum_size = Vector2(GUTTER_W, 0)
-	sec_gear.pressed.connect(_open_config_secondary)
-	sec_row.add_child(sec_gear)
+	sec_row.add_child(_gutter())
 	_fields.add_child(sec_row)
 
 	_populate_secondary_dropdown()
@@ -401,17 +401,16 @@ func _on_icon_file_selected(path: String) -> void:
 
 # ── Config dialog ────────────────────────────────────────────────────────
 
-func _open_config(start_tab: int = 0) -> void:
+func _open_config() -> void:
 	if not _config_dlg:
 		_config_dlg = AcceptDialog.new()
 		_config_dlg.set_script(ConfigDialog)
 		_config_dlg.setup(_ctx)
 		add_child(_config_dlg)
-	_config_dlg.open_to_tab(start_tab)
-
-
-func _open_config_secondary() -> void:
-	_open_config(2)
+	else:
+		# Read whatever tab the user was on last time before reopening.
+		_config_last_tab = _config_dlg._tabs.current_tab
+	_config_dlg.open_to_tab(_config_last_tab)
 
 
 # ── Restore defaults ─────────────────────────────────────────────────────
@@ -454,6 +453,46 @@ func _on_restore() -> void:
 
 
 # ── Style helpers ────────────────────────────────────────────────────────
+
+func _make_plus_icon() -> ImageTexture:
+	var sz := 17
+	var img := Image.create(sz, sz, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var cx := sz / 2
+	for i in range(1, sz - 1):
+		img.set_pixel(i, cx - 1, Color.WHITE)
+		img.set_pixel(i, cx,     Color.WHITE)
+		img.set_pixel(i, cx + 1, Color.WHITE)
+		img.set_pixel(cx - 1, i, Color.WHITE)
+		img.set_pixel(cx,     i, Color.WHITE)
+		img.set_pixel(cx + 1, i, Color.WHITE)
+	return ImageTexture.create_from_image(img)
+
+
+func _style_green_btn(btn: Button) -> void:
+	btn.text = ""
+	btn.icon = _make_plus_icon()
+	btn.expand_icon = false
+	btn.custom_minimum_size = Vector2(GUTTER_W, 0)
+	btn.add_theme_stylebox_override("normal",   _green_sb(Color(0.18, 0.50, 0.18)))
+	btn.add_theme_stylebox_override("hover",    _green_sb(Color(0.24, 0.62, 0.24)))
+	btn.add_theme_stylebox_override("pressed",  _green_sb(Color(0.12, 0.36, 0.12)))
+	btn.add_theme_stylebox_override("disabled", _green_sb(Color(0.12, 0.28, 0.12)))
+	btn.add_theme_color_override("font_color",          Color.WHITE)
+	btn.add_theme_color_override("font_hover_color",    Color.WHITE)
+	btn.add_theme_color_override("font_pressed_color",  Color.WHITE)
+	btn.add_theme_color_override("font_disabled_color", Color(1, 1, 1, 0.4))
+
+
+func _green_sb(bg: Color) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = bg
+	sb.corner_radius_top_left = 3
+	sb.corner_radius_top_right = 3
+	sb.corner_radius_bottom_left = 3
+	sb.corner_radius_bottom_right = 3
+	return sb
+
 
 func _make_x_icon() -> ImageTexture:
 	var sz := 17
@@ -555,10 +594,15 @@ func _rebuild_costs_ui(id: String, d: Dictionary) -> void:
 		name_lbl.text = display_name
 		name_lbl.add_theme_font_size_override("font_size", 11)
 		name_lbl.add_theme_color_override("font_color", clr)
-		name_lbl.custom_minimum_size = Vector2(60, 0)
-		name_lbl.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		name_lbl.custom_minimum_size = Vector2(LABEL_W, 0)
 		name_lbl.clip_text = true
 		row.add_child(name_lbl)
+
+		var cost_lbl := Label.new()
+		cost_lbl.text = "Cost:"
+		cost_lbl.add_theme_font_size_override("font_size", 10)
+		cost_lbl.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		row.add_child(cost_lbl)
 
 		var cost_spin := SpinBox.new()
 		cost_spin.min_value = 0
@@ -570,8 +614,14 @@ func _rebuild_costs_ui(id: String, d: Dictionary) -> void:
 		cost_spin.value = int(entry.get("cost", 0))
 		cost_spin.value_changed.connect(func(v: float):
 			if _updating: return
-			_update_cost_entry(id, cur_name, "cost", int(v)))
+			_update_cost_entry(_ctx.selected_skill_id, cur_name, "cost", int(v)))
 		row.add_child(cost_spin)
+
+		var inc_lbl := Label.new()
+		inc_lbl.text = "Increase:"
+		inc_lbl.add_theme_font_size_override("font_size", 10)
+		inc_lbl.size_flags_horizontal = SIZE_SHRINK_BEGIN
+		row.add_child(inc_lbl)
 
 		var inc_spin := SpinBox.new()
 		inc_spin.min_value = 0
@@ -583,24 +633,24 @@ func _rebuild_costs_ui(id: String, d: Dictionary) -> void:
 		inc_spin.value = int(entry.get("cost_increase", 0))
 		inc_spin.value_changed.connect(func(v: float):
 			if _updating: return
-			_update_cost_entry(id, cur_name, "cost_increase", int(v)))
+			_update_cost_entry(_ctx.selected_skill_id, cur_name, "cost_increase", int(v)))
 		row.add_child(inc_spin)
 
 		var exp_check := CheckButton.new()
-		exp_check.text = "Exp"
+		exp_check.text = "Exponential"
 		exp_check.add_theme_font_size_override("font_size", 10)
 		exp_check.tooltip_text = "Exponential cost scaling"
 		exp_check.button_pressed = bool(entry.get("exponential", false))
 		exp_check.toggled.connect(func(v: bool):
 			if _updating: return
-			_update_cost_entry(id, cur_name, "exponential", v))
+			_update_cost_entry(_ctx.selected_skill_id, cur_name, "exponential", v))
 		row.add_child(exp_check)
 
 		var remove_btn := Button.new()
 		remove_btn.tooltip_text = "Remove %s cost" % display_name
 		remove_btn.custom_minimum_size = Vector2(28, 28)
 		remove_btn.size_flags_horizontal = SIZE_SHRINK_END
-		remove_btn.pressed.connect(_remove_cost_entry.bind(id, cur_name))
+		remove_btn.pressed.connect(func(): _remove_cost_entry(_ctx.selected_skill_id, cur_name))
 		_style_red_btn(remove_btn)
 		row.add_child(remove_btn)
 
@@ -623,7 +673,7 @@ func _refresh_costs_add_opt(d: Dictionary) -> void:
 		if not already.has(cname):
 			_costs_add_opt.add_item(_ctx.snake_to_title(cname))
 			_costs_add_opt.set_item_metadata(_costs_add_opt.item_count - 1, cname)
-	_costs_add_btn.disabled = _costs_add_opt.item_count == 0
+	_costs_add_row.visible = _costs_add_opt.item_count > 0
 
 
 func _do_add_currency_cost() -> void:
